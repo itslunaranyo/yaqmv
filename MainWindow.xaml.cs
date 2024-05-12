@@ -22,6 +22,7 @@ namespace yaqmv
 	public partial class MainWindow : Window
 	{
         private Shader shader;
+        private Texture CurrentSkin;
         private ModelAsset? CurrentModelAsset;
         private Model? CurrentModel;
         private Stopwatch _time;
@@ -41,11 +42,12 @@ namespace yaqmv
 			};
             OpenTkControl.Start(settings);
 
-			shader = new Shader("shaders/default.vs", "shaders/default.fs");
+			shader = new Shader("shaders/default_v.shader", "shaders/default_f.shader");
             
 			CurrentModelAsset = new ModelAsset("c:/games/quake/id1/progs/hknight.mdl");
 			//CurrentModelAsset = new ModelAsset("c:/games/quake/copper_dev/progs/m_rock1.mdl");
 			CurrentModel = ModelConvertor.Convert(CurrentModelAsset, shader);
+			CurrentSkin = new Texture(CurrentModelAsset.SkinWidth, CurrentModelAsset.SkinHeight, CurrentModelAsset.skins[0].pixels);
 		}
 
         private void OnSizeChanged(object sender, SizeChangedEventArgs e)
@@ -77,6 +79,7 @@ namespace yaqmv
 
             shader.Use();
             CurrentModel.Bind((int)Math.Floor(_time.Elapsed.TotalSeconds*10) % CurrentModelAsset.FrameCount);
+			CurrentSkin.Bind();
             shader.SetUniform("model", matmodel);
             shader.SetUniform("view", matview);
             shader.SetUniform("projection", matpersp);

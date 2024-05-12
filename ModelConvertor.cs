@@ -22,13 +22,13 @@ namespace yaqmv
 			Vector2 n;
 			for (i = 0; i < asset.VertexCount; i++)
 			{
-				n.X = asset.verts[i].position.X / asset.SkinWidth;
-				n.Y = asset.verts[i].position.Y / asset.SkinHeight;
+				n.X = (asset.verts[i].position.X + 0.5f) / asset.SkinWidth;
+				n.Y = (asset.verts[i].position.Y + 0.5f) / asset.SkinHeight;
 				UVList.Add(n);
 				if (asset.verts[i].onseam)
 				{
-					n.X = asset.verts[i].position.X / asset.SkinWidth + 0.5f;
-					n.Y = asset.verts[i].position.Y / asset.SkinHeight;
+					n.X = (asset.verts[i].position.X + 0.5f) / asset.SkinWidth + 0.5f;
+					n.Y = (asset.verts[i].position.Y + 0.5f) / asset.SkinHeight;
 					UVList2.Add(n);
 					backfacemap[i] = j++;
 				}

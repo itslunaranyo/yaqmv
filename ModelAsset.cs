@@ -65,14 +65,19 @@ namespace yaqmv
 		internal class Skin
 		{
 			public byte[] indices;
-			public Vector3[] pixels;
+			public byte[] pixels;
 			public Skin(BinaryReader mdl, Header h)
 			{
 				indices = mdl.ReadBytes(h.skinwidth * h.skinheight);
-				pixels = new Vector3[h.skinwidth * h.skinheight];
+				pixels = new byte[h.skinwidth * h.skinheight * 4];
+				int j = 0;
 				for (int i = 0; i < h.skinwidth * h.skinheight; i++)
 				{
-					// match to the palette you totally loaded here
+					var color = Palette.Color(indices[i]);
+					pixels[j++] = color.Item1;
+					pixels[j++] = color.Item2;
+					pixels[j++] = color.Item3;
+					pixels[j++] = color.Item4;
 				}
 			}
 		}
