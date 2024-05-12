@@ -13,6 +13,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Diagnostics;
+using System.Drawing;
 
 namespace yaqmv
 {
@@ -21,71 +22,49 @@ namespace yaqmv
 	/// </summary>
 	public partial class MainWindow : Window
 	{
-        private Shader shader;
-        private Texture CurrentSkin;
-        private ModelAsset? CurrentModelAsset;
-        private Model? CurrentModel;
-        private Stopwatch _time;
-
-        public MainWindow()
+		private ModelRenderer mr;
+		public int RendererWidth { get { return (int)OpenTkControl.ActualWidth; } }
+		public int RendererHeight { get { return (int)OpenTkControl.ActualHeight; } }
+		public MainWindow()
 		{
-            _time = new Stopwatch();
-			_time.Start();
-
 			InitializeComponent();
 
-            var settings = new GLWpfControlSettings
-            {
-                MajorVersion = 3,
-                MinorVersion = 3,
+			var settings = new GLWpfControlSettings
+			{
+				MajorVersion = 3,
+				MinorVersion = 3,
 				GraphicsProfile = ContextProfile.Core
 			};
-            OpenTkControl.Start(settings);
+			OpenTkControl.Start(settings);
 
-			shader = new Shader("shaders/default_v.shader", "shaders/default_f.shader");
-            
-			CurrentModelAsset = new ModelAsset("c:/games/quake/id1/progs/hknight.mdl");
-			//CurrentModelAsset = new ModelAsset("c:/games/quake/copper_dev/progs/m_rock1.mdl");
-			CurrentModel = ModelConvertor.Convert(CurrentModelAsset, shader);
-			CurrentSkin = new Texture(CurrentModelAsset.SkinWidth, CurrentModelAsset.SkinHeight, CurrentModelAsset.skins[0].pixels);
+			mr = new ModelRenderer("c:/games/quake/id1/progs/hknight.mdl");
+			//mr = new ModelRenderer("c:/games/quake/copper_dev/progs/m_rock1.mdl");
+			mr.Resize(RendererWidth, RendererHeight);
 		}
 
-        private void OnSizeChanged(object sender, SizeChangedEventArgs e)
+		private void OnSizeChanged(object sender, SizeChangedEventArgs e)
         {
-			GL.Viewport(0, 0, (int)OpenTkControl.ActualWidth, (int)OpenTkControl.ActualHeight);
+			mr.Resize(RendererWidth, RendererHeight);
+			GL.Viewport(0, 0, RendererWidth, RendererHeight);
 			GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 		}
 		private void OnReady()
         {
             GL.ClearColor(0.2f, 0.2f, 0.2f, 1.0f);
-            GL.Viewport(0, 0, (int)OpenTkControl.ActualWidth, (int)OpenTkControl.ActualHeight);
+            GL.Viewport(0, 0, RendererWidth, RendererHeight);
             GL.Enable(EnableCap.DepthTest);
+            GL.Enable(EnableCap.CullFace);
+			GL.CullFace(CullFaceMode.Front);
         }
 
         private void OnRender(TimeSpan delta)
         {
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
+			if (mr == null) return;
 
-            if (CurrentModel == null)
-                return;
-            //GL.CullFace(CullFaceMode.FrontAndBack);
-            float asp = (float)(OpenTkControl.ActualWidth / OpenTkControl.ActualHeight);
-            float vfov = MathHelper.DegreesToRadians(60f);
+			mr.Render();
 
-            Matrix4 matpersp = Matrix4.CreatePerspectiveFieldOfView(vfov, asp, 1f, 2000.0f);
-            Matrix4 matview = Matrix4.LookAt(new Vector3(64,64,24), new Vector3(0,0,16), new Vector3(0,0,1));
-            Matrix4 matmodel = Matrix4.Identity;
-            //Matrix4 matmodel = Matrix4.CreateRotationZ((float)_time.Elapsed.TotalSeconds);
-
-            shader.Use();
-            CurrentModel.Bind((int)Math.Floor(_time.Elapsed.TotalSeconds*10) % CurrentModelAsset.FrameCount);
-			CurrentSkin.Bind();
-            shader.SetUniform("model", matmodel);
-            shader.SetUniform("view", matview);
-            shader.SetUniform("projection", matpersp);
-
-            GL.DrawElements(PrimitiveType.Triangles, CurrentModel.Elements, DrawElementsType.UnsignedInt, 0);
-        }
+		}
 		private void OnKeyDown(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Escape)
@@ -96,7 +75,7 @@ namespace yaqmv
 
         private void OnUnload(object sender, RoutedEventArgs e)
         {
-            shader.Dispose();
+            mr.Dispose();
         }
 	}
 }

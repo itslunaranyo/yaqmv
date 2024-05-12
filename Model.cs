@@ -10,7 +10,7 @@ using System.Xml.Linq;
 
 namespace yaqmv
 {
-	internal class Model
+	internal class Model : IDisposable
 	{
 		private int VertexBufferObject;
 		private int VertexArrayObject;
@@ -21,6 +21,8 @@ namespace yaqmv
 		private readonly int attrib_pos = 0;
 		private readonly int attrib_norm = 1;
 		private readonly int attrib_uv = 2;
+
+		private bool _disposed;
 
 		public Model(int framecount, int[] indices, List<Vector2> uvs, List<Vector3> positions, List<Vector3> normals, Shader shader)
 		{
@@ -66,6 +68,21 @@ namespace yaqmv
 			GL.EnableVertexAttribArray(attrib_pos);
 			GL.VertexAttribPointer(attrib_norm, 3, VertexAttribPointerType.Float, false, 6 * sizeof(float), (Count * 2 + Count * pose * 6 + 3) * sizeof(float));
 			GL.EnableVertexAttribArray(attrib_norm);
+		}
+		~Model()
+		{
+			if (!_disposed)
+			{
+				Debug.WriteLine("GPU resource leak - undisposed buffers");
+			}
+		}
+		public void Dispose()
+		{
+			if (_disposed) return;
+			GL.DeleteBuffers(1, ref VertexBufferObject);
+			GL.DeleteBuffers(1, ref ElementBufferObject);
+			GL.DeleteVertexArrays(1, ref VertexArrayObject);
+			_disposed = true;
 		}
 	}
 }
