@@ -6,14 +6,17 @@
         xmlns:glWpfControl="clr-namespace:OpenTK.Wpf;assembly=GLWpfControl"
         xmlns:local="clr-namespace:yaqmv"
         mc:Ignorable="d"
-        Title="MainWindow" Height="500" Width="500">
+        Title="YAQ Model Viewer" Height="600" Width="600">
     <Grid>
-        <glWpfControl:GLWpfControl 
-            x:Name="OpenTkControl" 
-            Render="OnRender"
-			SizeChanged="OnSizeChanged"
-            Ready="OnReady"
-			Unloaded="OnUnload"
-            KeyDown="OnKeyDown"/>
-    </Grid>
+		<local:ModelWindow 
+            x:Name="ModelWindow" 
+            Render="MWOnRender"
+			SizeChanged="MWOnSizeChanged"
+			Unloaded="MWOnUnload"
+            KeyDown="MWOnKeyDown"
+			MouseDown="MWOnMouseDown"
+			MouseUp="MWOnMouseUp"
+			MouseMove="MWOnMouseMove"
+			/>
+	</Grid>
 </Window>
