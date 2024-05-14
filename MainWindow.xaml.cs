@@ -10,6 +10,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Diagnostics;
 using System.Drawing;
+using Microsoft.Win32;
 
 namespace yaqmv
 {
@@ -25,11 +26,16 @@ namespace yaqmv
 
 			_mw = (ModelWindow)FindName("ModelWindow");
 		}
+		internal static MainWindow Win { get { return (MainWindow)Application.Current.MainWindow; } }
 
 		private void MWOnSizeChanged(object sender, SizeChangedEventArgs e) { _mw.OnSizeChanged(sender, e); }
 		private void MWOnRender(TimeSpan delta) { _mw.OnRender(delta); }
 		private void MWOnUnload(object sender, RoutedEventArgs e) { _mw.OnUnload(sender, e); }
 
+		internal void Display(ModelAsset mdl)
+		{
+			_mw.LoadModel(mdl);
+		}
 
 		// =====================
 		// INPUT
@@ -45,7 +51,7 @@ namespace yaqmv
 				Camera.Orbit((float)delta.X, (float)delta.Y);
 			else if (Mouse.RightButton == MouseButtonState.Pressed)
 				Camera.Dolly((float)delta.X + (float)delta.Y);
-			else if(Mouse.MiddleButton == MouseButtonState.Pressed)
+			else if (Mouse.MiddleButton == MouseButtonState.Pressed)
 				Camera.Pan((float)delta.X, (float)delta.Y);
 
 			_mousepos = newpos;
@@ -55,6 +61,21 @@ namespace yaqmv
 			if (e.Key == Key.Escape)
 			{
 				Close();
+				return;
+			}
+			if (e.Key == Key.F)
+			{
+				YAQMVApp.App.Focus();
+			}
+		}
+
+		private void MenuFileOpen(object sender, RoutedEventArgs e)
+		{
+			OpenFileDialog openFileDialog = new OpenFileDialog();
+			openFileDialog.Filter = "Quake model files (*.mdl)|*.mdl|All files (*.*)|*.*";
+			if (openFileDialog.ShowDialog() == true)
+			{
+				YAQMVApp.App.LoadAsset(openFileDialog.FileName);
 			}
 		}
 	}

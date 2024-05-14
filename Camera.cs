@@ -17,44 +17,50 @@ namespace yaqmv
 		private static float _range = 96;
 
 		private static float _sens_orbit = 0.025f;
-		private static float _sens_pan = 0.4f;
+		private static float _sens_pan = 0.0033f;
 		private static float _sens_dolly = 2f;
 		private static float _sensitivity = 1f;
 
-		public static void Reset()
+		internal static void Reset(Vector3 center, float radius)
 		{
 			_pitch = 0.3f;
 			_yaw = -0.6f;
 			_panh = 0;
-			_panv = 8;
-			_range = 100;
+			_panv = center.Z;
+			_range = radius * 1.2f;
+		}
+		internal static void Recenter(Vector3 center, float radius)
+		{
+			_panh = 0;
+			_panv = center.Z;
+			_range = radius * 1.2f;
 		}
 
-		public static void Orbit(float turnh, float turnv)
+		internal static void Orbit(float turnh, float turnv)
 		{
 			_pitch = MathF.Min(MathF.Max(_pitch + turnv * _sensitivity * _sens_orbit, -1.57f), 1.57f);
 			_yaw = (_yaw + turnh * _sensitivity * _sens_orbit) % (2 * MathF.PI);
 		}
-		public static void Pan(float slideh, float slidev)
+		internal static void Pan(float slideh, float slidev)
 		{
-			_panh -= slideh * _sensitivity * _sens_pan;
-			_panv += slidev * _sensitivity * _sens_pan;
+			_panh -= slideh * _sensitivity * _sens_pan * _range;
+			_panv += slidev * _sensitivity * _sens_pan * _range;
 		}
-		public static void Dolly(float amt)
+		internal static void Dolly(float amt)
 		{
-			_range = MathF.Min(MathF.Max(_range + amt * _sensitivity * _sens_dolly, 8f), 512f);
+			_range = MathF.Min(MathF.Max(_range + amt * _sensitivity * _sens_dolly, 8f), 2048f);
 		}
 
-		public static Vector3 Origin {
+		internal static Vector3 Origin {
 			get {
 				return Focus + new Vector3(_range * MathF.Cos(_pitch), 0, _range * MathF.Sin(_pitch));
 			}
 		}
-		public static Vector3 Focus {
+		internal static Vector3 Focus {
 			get {
 				return new Vector3(0, _panh, _panv);
 			}
 		}
-		public static float Yaw { get { return _yaw; } }
+		internal static float Yaw { get { return _yaw; } }
 	}
 }

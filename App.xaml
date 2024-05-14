@@ -1,4 +1,4 @@
-﻿<Application x:Class="yaqmv.App"
+﻿<Application x:Class="yaqmv.YAQMVApp"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:local="clr-namespace:yaqmv"

@@ -13,25 +13,66 @@ namespace yaqmv
 {
 	internal class ModelAsset
 	{
+		internal ModelAsset(string mdlpath)
+		{
+			using (var mdlfile = new BinaryReader(File.OpenRead(mdlpath), Encoding.ASCII))
+			{
+				header = new Header(mdlfile);
+				float group;
+
+				// TODO test Enumerable.Repeat for stability on these
+				skins = new Skin[header.skincount];
+				for (int i = 0; i < header.skincount; i++)
+				{
+					group = mdlfile.ReadInt32();
+					if (group != 0)
+					{
+						// TODO handle skingroup accordingly
+					}
+					skins[i] = new Skin(mdlfile, header);
+				}
+
+				verts = new Vertex[header.vertexcount];
+				for (int i = 0; i < header.vertexcount; i++)
+					verts[i] = new Vertex(mdlfile, header);
+
+				tris = new Triangle[header.trianglecount];
+				for (int i = 0; i < header.trianglecount; i++)
+					tris[i] = new Triangle(mdlfile, header);
+
+				frames = new Frame[header.framecount];
+				for (int i = 0; i < header.framecount; i++)
+				{
+					group = mdlfile.ReadInt32();
+					if (group != 0)
+					{
+						// TODO handle framegroup accordingly
+					}
+					frames[i] = new Frame(mdlfile, header);
+				}
+				Debug.Assert(mdlfile.BaseStream.Position == mdlfile.BaseStream.Length, "didn't read the entire file for some reason");
+			}
+		}
+
 		internal struct Header
 		{
-			public char[] ident;
-			public int version;
-			public Vector3 scale;
-			public Vector3 origin;
-			public float radius;
-			public Vector3 eyepos;
-			public int skincount;
-			public int skinwidth;
-			public int skinheight;
-			public int vertexcount;
-			public int trianglecount;
-			public int framecount;
-			public int synctype;
-			public int flags;
-			public float average_size;
+			internal char[] ident;
+			internal int version;
+			internal Vector3 scale;
+			internal Vector3 origin;
+			internal float radius;
+			internal Vector3 eyepos;
+			internal int skincount;
+			internal int skinwidth;
+			internal int skinheight;
+			internal int vertexcount;
+			internal int trianglecount;
+			internal int framecount;
+			internal int synctype;
+			internal int flags;
+			internal float average_size;
 
-			public Header(BinaryReader mdl)
+			internal Header(BinaryReader mdl)
 			{
 				ident = mdl.ReadChars(4);
 				version = mdl.ReadInt32();
@@ -110,6 +151,12 @@ namespace yaqmv
 				origin_compressed = (mdl.ReadByte(), mdl.ReadByte(), mdl.ReadByte());
 				normal_compressed = mdl.ReadByte();
 			}
+			public Vector3 UncompressedOrigin(ModelAsset mdl)
+			{
+				return new Vector3(origin_compressed.Item1 * mdl.Scale[0] + mdl.Origin[0],
+					origin_compressed.Item2 * mdl.Scale[1] + mdl.Origin[1],
+					origin_compressed.Item3 * mdl.Scale[2] + mdl.Origin[2]);
+			}
 		}
 		internal class Frame
 		{
@@ -132,59 +179,31 @@ namespace yaqmv
 		}
 
 		Header header;
-		public Skin[] skins;
-		public Vertex[] verts;
-		public Triangle[] tris;
-		public Frame[] frames;
+		internal Skin[] skins;
+		internal Vertex[] verts;
+		internal Triangle[] tris;
+		internal Frame[] frames;
 
-		public int SkinCount { get { return header.skincount; } }
-		public int SkinWidth { get { return header.skinwidth; } }
-		public int SkinHeight { get { return header.skinheight; } }
-		public int VertexCount	 { get { return header.vertexcount; } }
-		public int TriangleCount { get { return header.trianglecount; } }
-		public int FrameCount { get { return header.framecount; } }
-		public Vector3 Scale { get { return header.scale; } }
-		public Vector3 Origin { get { return header.origin; } }
+		internal int SkinCount { get { return header.skincount; } }
+		internal int SkinWidth { get { return header.skinwidth; } }
+		internal int SkinHeight { get { return header.skinheight; } }
+		internal int VertexCount { get { return header.vertexcount; } }
+		internal int TriangleCount { get { return header.trianglecount; } }
+		internal int FrameCount { get { return header.framecount; } }
+		internal Vector3 Scale { get { return header.scale; } }
+		internal Vector3 Origin { get { return header.origin; } }
 
-		public ModelAsset(string mdlpath)
-        {
-			using (var mdlfile = new BinaryReader(File.OpenRead(mdlpath), Encoding.ASCII))
-			{
-				header = new Header(mdlfile);
-				float group;
-
-				// TODO test Enumerable.Repeat for stability on these
-				skins = new Skin[header.skincount];
-				for (int i = 0; i < header.skincount; i++)
-				{
-					group = mdlfile.ReadInt32();
-					if (group != 0)
-					{
-						// TODO handle skingroup accordingly
-					}
-					skins[i] = new Skin(mdlfile, header);
-				}
-
-				verts = new Vertex[header.vertexcount];
-				for (int i = 0; i < header.vertexcount; i++)
-					verts[i] = new Vertex(mdlfile, header);
-
-				tris = new Triangle[header.trianglecount];
-				for (int i = 0; i < header.trianglecount; i++)
-					tris[i] = new Triangle(mdlfile, header);
-
-				frames = new Frame[header.framecount];
-				for (int i = 0; i < header.framecount; i++)
-				{
-					group = mdlfile.ReadInt32();
-					if (group != 0)
-					{
-						// TODO handle framegroup accordingly
-					}
-					frames[i] = new Frame(mdlfile, header);
-				}
-				Debug.Assert(mdlfile.BaseStream.Position == mdlfile.BaseStream.Length, "didn't read the entire file for some reason");
-			}
+		internal Vector3 CenterOfFrame(int frame)
+		{
+			Vector3 mins = frames[frame].mins.UncompressedOrigin(this);
+			Vector3 maxs = frames[frame].maxs.UncompressedOrigin(this);
+			return (mins + maxs) * 0.5f;
+		}
+		internal float RadiusOfFrame(int frame)
+		{
+			Vector3 mins = frames[frame].mins.UncompressedOrigin(this);
+			Vector3 maxs = frames[frame].maxs.UncompressedOrigin(this);
+			return (maxs - mins).Length;
 		}
 	}
 }

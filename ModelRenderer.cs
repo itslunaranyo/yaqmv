@@ -16,30 +16,30 @@ namespace yaqmv
 	{
 		private Shader shader;
 		private Texture CurrentSkin;
-		private ModelAsset CurrentModelAsset;
 		private Model CurrentModel;
+		private ModelAsset CurrentAsset;
 		private Stopwatch _time;
 		private float Width, Height;
 		private bool _disposed;
-		
-		public ModelRenderer(string mdlfile)
+
+		internal ModelRenderer(ModelAsset mdl)
 		{
 			_time = new Stopwatch();
 			_time.Start();
 			_disposed = false;
 			shader = new Shader("shaders/default_v.shader", "shaders/default_f.shader");
 
-			CurrentModelAsset = new ModelAsset(mdlfile);
-			CurrentModel = ModelConvertor.Convert(CurrentModelAsset, shader);
-			CurrentSkin = new Texture(CurrentModelAsset.SkinWidth, CurrentModelAsset.SkinHeight, CurrentModelAsset.skins[0].pixels);
+			CurrentAsset = mdl;
+			CurrentModel = ModelConvertor.Convert(mdl, shader);
+			CurrentSkin = new Texture(mdl.SkinWidth, mdl.SkinHeight, mdl.skins[0].pixels);
 		}
-		public void Resize(int w, int h)
+		internal void Resize(int w, int h)
 		{
 			Width = w;
 			Height = h;
 		}
 
-		public void Render()
+		internal void Render()
 		{
 			float asp = Width / Height;
 			float vfov = MathHelper.DegreesToRadians(60f);
@@ -49,7 +49,7 @@ namespace yaqmv
 			Matrix4 matmodel = Matrix4.CreateRotationZ(Camera.Yaw);
 
 			shader.Use();
-			CurrentModel.Bind((int)Math.Floor(_time.Elapsed.TotalSeconds * 10) % CurrentModelAsset.FrameCount);
+			CurrentModel.Bind((int)Math.Floor(_time.Elapsed.TotalSeconds * 10) % CurrentAsset.FrameCount);
 			CurrentSkin.Bind();
 			shader.SetUniform("model", matmodel);
 			shader.SetUniform("view", matview);

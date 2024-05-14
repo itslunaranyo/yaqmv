@@ -24,15 +24,22 @@ namespace yaqmv
 			};
 			Start(settings);
 
-			mr = new ModelRenderer("c:/games/quake/id1/progs/hknight.mdl");
-			//mr = new ModelRenderer("c:/games/quake/copper_dev/progs/m_rock1.mdl");
-			mr?.Resize((int)ActualWidth, (int)ActualHeight);
+			//mr = new ModelRenderer("c:/games/quake/id1/progs/hknight.mdl");
+			//mr?.Resize((int)ActualWidth, (int)ActualHeight);
 
 			GL.ClearColor(0.2f, 0.2f, 0.2f, 1.0f);
 			GL.Viewport(0, 0, (int)ActualWidth, (int)ActualHeight);
 			GL.Enable(EnableCap.DepthTest);
 			GL.Enable(EnableCap.CullFace);
 			GL.CullFace(CullFaceMode.Front);
+		}
+
+		internal void LoadModel(ModelAsset mdl)
+		{
+			mr?.Dispose();
+			mr = new ModelRenderer(mdl);
+			mr?.Resize((int)ActualWidth, (int)ActualHeight);
+			Camera.Reset(mdl.CenterOfFrame(0), mdl.RadiusOfFrame(0));
 		}
 
 		public void OnSizeChanged(object sender, SizeChangedEventArgs e)

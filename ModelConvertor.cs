@@ -65,12 +65,8 @@ namespace yaqmv
 				var normlist = new List<Vector3>(Enumerable.Repeat(new Vector3(), UVList.Count));
 				for (i = 0; i < asset.VertexCount; i++)
 				{
-					var orgc = frame.positions[i].origin_compressed;
-					var normc = frame.positions[i].normal_compressed;
-					poslist[i] = new Vector3(orgc.Item1 * asset.Scale[0] + asset.Origin[0],
-											 orgc.Item2 * asset.Scale[1] + asset.Origin[1],
-											 orgc.Item3 * asset.Scale[2] + asset.Origin[2]);
-					normlist[i] = normaltable[normc];
+					poslist[i] = frame.positions[i].UncompressedOrigin(asset);
+					normlist[i] = normaltable[frame.positions[i].normal_compressed];
 					if (backfacemap[i] != i)
 					{
 						poslist[backfacemap[i]] = poslist[i];
