@@ -26,6 +26,7 @@ namespace yaqmv
 		{
 			_time.Restart();
 			LoadedAsset = new ModelAsset(filename);
+			_modelstate = new ModelState();
 			((MainWindow)MainWindow).Display(LoadedAsset);
 			return true;
 		}
