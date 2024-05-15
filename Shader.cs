@@ -19,7 +19,7 @@ namespace yaqmv
 
         public Shader(string vertexPath, string fragmentPath)
         {
-			string VertexShaderSource = Resource.ReadText(vertexPath);
+			string VertexShaderSource = Utility.ReadResourceText(vertexPath);
 			var VertexShader = GL.CreateShader(ShaderType.VertexShader);
             GL.ShaderSource(VertexShader, VertexShaderSource);
             GL.CompileShader(VertexShader);
@@ -30,7 +30,7 @@ namespace yaqmv
                 Debug.WriteLine(infoLog);
             }
 
-            string FragmentShaderSource = Resource.ReadText(fragmentPath);
+            string FragmentShaderSource = Utility.ReadResourceText(fragmentPath);
             var FragmentShader = GL.CreateShader(ShaderType.FragmentShader);
             GL.ShaderSource(FragmentShader, FragmentShaderSource);
             GL.CompileShader(FragmentShader);

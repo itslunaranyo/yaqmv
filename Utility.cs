@@ -8,9 +8,9 @@ using System.Windows.Resources;
 
 namespace yaqmv
 {
-	public partial class Resource
+	public static class Utility
 	{
-		public static string ReadText(string path)
+		public static string ReadResourceText(string path)
 		{
 			StreamResourceInfo srinfo = YAQMVApp.GetResourceStream(new Uri(path, UriKind.Relative));
 			StreamReader sr = new StreamReader(srinfo.Stream);
