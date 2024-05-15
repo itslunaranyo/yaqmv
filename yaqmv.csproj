@@ -17,7 +17,17 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="shaders\default_f.shader" />
+    <None Remove="shaders\default_v.shader" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="OpenTK.GLWpfControl" Version="4.2.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="shaders\default_f.shader" />
+    <Resource Include="shaders\default_v.shader" />
   </ItemGroup>
 
   <ItemGroup>

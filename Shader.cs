@@ -8,6 +8,7 @@ using System.Diagnostics;
 using OpenTK.Graphics.OpenGL;
 using OpenTK.Mathematics;
 using System.Windows.Media.Media3D;
+using System.Windows.Resources;
 
 namespace yaqmv
 {
@@ -18,8 +19,8 @@ namespace yaqmv
 
         public Shader(string vertexPath, string fragmentPath)
         {
-            string VertexShaderSource = File.ReadAllText(vertexPath);
-            var VertexShader = GL.CreateShader(ShaderType.VertexShader);
+			string VertexShaderSource = Resource.ReadText(vertexPath);
+			var VertexShader = GL.CreateShader(ShaderType.VertexShader);
             GL.ShaderSource(VertexShader, VertexShaderSource);
             GL.CompileShader(VertexShader);
             GL.GetShader(VertexShader, ShaderParameter.CompileStatus, out int success);
@@ -29,7 +30,7 @@ namespace yaqmv
                 Debug.WriteLine(infoLog);
             }
 
-            string FragmentShaderSource = File.ReadAllText(fragmentPath);
+            string FragmentShaderSource = Resource.ReadText(fragmentPath);
             var FragmentShader = GL.CreateShader(ShaderType.FragmentShader);
             GL.ShaderSource(FragmentShader, FragmentShaderSource);
             GL.CompileShader(FragmentShader);
