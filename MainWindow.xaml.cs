@@ -62,6 +62,10 @@ namespace yaqmv
 			{
 				YAQMVApp.App.Focus();
 			}
+			if (e.Key == Key.K)
+			{
+				YAQMVApp.App.CycleSkin();
+			}
 		}
 
 		private void MenuFileQuit(object sender, RoutedEventArgs e)

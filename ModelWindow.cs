@@ -24,9 +24,6 @@ namespace yaqmv
 			};
 			Start(settings);
 
-			//mr = new ModelRenderer("c:/games/quake/id1/progs/hknight.mdl");
-			//mr?.Resize((int)ActualWidth, (int)ActualHeight);
-
 			GL.ClearColor(0.2f, 0.2f, 0.2f, 1.0f);
 			GL.Viewport(0, 0, (int)ActualWidth, (int)ActualHeight);
 			GL.Enable(EnableCap.DepthTest);
@@ -53,7 +50,7 @@ namespace yaqmv
 		{
 			GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
-			mr?.Render();
+			mr?.Render(YAQMVApp.App.GetModelState());
 		}
 		public void OnUnload(object sender, RoutedEventArgs e)
 		{
