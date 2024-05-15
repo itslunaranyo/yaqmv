@@ -49,7 +49,7 @@ namespace yaqmv
 				palette[index * 3], 
 				palette[index * 3 + 1],
 				palette[index * 3 + 2],
-				index > 239 ? (byte)255 : (byte)0   // fullbright alpha
+				index > 223 ? (byte)255 : (byte)0   // fullbright alpha
 				);
 			return col;
 		}
