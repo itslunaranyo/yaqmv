@@ -58,17 +58,16 @@ namespace yaqmv
 		}
 		private void MWOnKeyDown(object sender, KeyEventArgs e)
 		{
-			if (e.Key == Key.Escape)
-			{
-				Close();
-				return;
-			}
 			if (e.Key == Key.F)
 			{
 				YAQMVApp.App.Focus();
 			}
 		}
 
+		private void MenuFileQuit(object sender, RoutedEventArgs e)
+		{
+			Close();
+		}
 		private void MenuFileOpen(object sender, RoutedEventArgs e)
 		{
 			OpenFileDialog openFileDialog = new OpenFileDialog();

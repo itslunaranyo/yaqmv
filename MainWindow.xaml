@@ -16,7 +16,7 @@
 			<MenuItem Header="_File">
 				<MenuItem Header="_Open" Click="MenuFileOpen" />
 				<Separator />
-				<MenuItem Header="_Exit" />
+				<MenuItem Header="_Exit" Click="MenuFileQuit" />
 			</MenuItem>
 		</Menu>
 		<local:ModelWindow 
