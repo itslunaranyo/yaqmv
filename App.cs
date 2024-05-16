@@ -22,14 +22,17 @@ namespace yaqmv
 			Debug.Print("app started");
 			LoadedAsset = null;
 		}
+
 		internal bool LoadAsset(string filename)
 		{
 			_time.Restart();
 			LoadedAsset = new ModelAsset(filename);
 			_modelstate = new ModelState();
+
 			((MainWindow)MainWindow).Display(LoadedAsset);
 			return true;
 		}
+
 		internal void Focus()
 		{
 			if (LoadedAsset == null) return;
@@ -47,10 +50,17 @@ namespace yaqmv
 			int a = _modelstate.Anim;
 			a = (a + (back? -1 : 1));
 			a = Math.Min(LoadedAsset.anims.Count() - 1, Math.Max(a, 0));
+			SelectAnim(a);
+		}
+		internal void SelectAnim(int a)
+		{
+			if (LoadedAsset == null) return;
+
 			if (a != _modelstate.Anim)
 				_time.Restart();
 			_modelstate.Anim = a;
 		}
+
 		internal ModelState GetModelState()
 		{
 			_modelstate.Frame = LoadedAsset.anims[_modelstate.Anim].first + 

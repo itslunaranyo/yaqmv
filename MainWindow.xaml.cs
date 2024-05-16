@@ -11,6 +11,7 @@ using System.Windows.Shapes;
 using System.Diagnostics;
 using System.Drawing;
 using Microsoft.Win32;
+using System.Collections.ObjectModel;
 
 namespace yaqmv
 {
@@ -20,12 +21,19 @@ namespace yaqmv
 	public partial class MainWindow : Window
 	{
 		ModelWindow _mw;
+		ObservableCollection<string> AnimNames = new ObservableCollection<string>();
 		public MainWindow()
 		{
 			InitializeComponent();
 
 			_mw = (ModelWindow)FindName("ModelWindow");
 		}
+		private void Window_Loaded(object sender, RoutedEventArgs e)
+		{
+			AnimSelect.ItemsSource = AnimNames;
+		}
+
+
 		internal static MainWindow Win { get { return (MainWindow)Application.Current.MainWindow; } }
 
 		private void MWOnSizeChanged(object sender, SizeChangedEventArgs e) { _mw.OnSizeChanged(sender, e); }
@@ -35,6 +43,10 @@ namespace yaqmv
 		internal void Display(ModelAsset mdl)
 		{
 			_mw.LoadModel(mdl);
+			AnimNames.Clear();
+			foreach (var anim in mdl.anims)
+				AnimNames.Add(anim.name);
+			AnimSelect.SelectedIndex = 0;
 		}
 
 		// =====================
@@ -84,6 +96,11 @@ namespace yaqmv
 			{
 				YAQMVApp.App.LoadAsset(openFileDialog.FileName);
 			}
+		}
+
+		private void AnimSelect_SelectionChanged(object sender, SelectionChangedEventArgs e)
+		{
+			YAQMVApp.App.SelectAnim(AnimSelect.SelectedIndex);
 		}
 	}
 }

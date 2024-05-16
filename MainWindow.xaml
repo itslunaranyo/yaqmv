@@ -6,11 +6,13 @@
         xmlns:glWpfControl="clr-namespace:OpenTK.Wpf;assembly=GLWpfControl"
         xmlns:local="clr-namespace:yaqmv"
         mc:Ignorable="d"
-        Title="YAQ Model Viewer" Height="600" Width="600">
-	<Grid>
+		Loaded="Window_Loaded"
+        Title="YAQ Model Viewer" Height="720" Width="600">
+	<Grid Background="#FFDFDFDF">
 		<Grid.RowDefinitions>
 			<RowDefinition Height="Auto" />
 			<RowDefinition Height="*" />
+			<RowDefinition Height="180" />
 		</Grid.RowDefinitions>
 		<Menu VerticalAlignment="Top">
 			<MenuItem Header="_File">
@@ -29,5 +31,19 @@
 				MouseWheel="MWOnMouseWheel"
 				Grid.Row="1"
 			/>
+		<Grid Grid.Row="2">
+			<Grid.RowDefinitions>
+				<RowDefinition Height="*" />
+			</Grid.RowDefinitions>
+			<StackPanel Margin="8">
+				<WrapPanel>
+					<TextBox Text="Sequence: " Background="{x:Null}" BorderBrush="{x:Null}" />
+					<ComboBox x:Name="AnimSelect" 
+							  Width="128" 
+							  IsReadOnly="True"
+							  SelectionChanged="AnimSelect_SelectionChanged"/>
+				</WrapPanel>
+			</StackPanel>
+		</Grid>
 	</Grid>
 </Window>
