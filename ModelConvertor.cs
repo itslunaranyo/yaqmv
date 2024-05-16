@@ -66,7 +66,7 @@ namespace yaqmv
 				for (i = 0; i < asset.VertexCount; i++)
 				{
 					poslist[i] = frame.positions[i].UncompressedOrigin(asset);
-					normlist[i] = normaltable[frame.positions[i].normal_compressed];
+					normlist[i] = normaltable[frame.positions[i].normalCompressed];
 					if (backfacemap[i] != i)
 					{
 						poslist[backfacemap[i]] = poslist[i];

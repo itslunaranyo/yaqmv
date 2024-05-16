@@ -40,10 +40,17 @@ namespace yaqmv
 			if (LoadedAsset == null) return;
 			_modelstate.Skin = (_modelstate.Skin + 1) % LoadedAsset.SkinCount;
 		}
-
+		internal void CycleAnim(bool back)
+		{
+			_time.Restart();
+			if (LoadedAsset == null) return;
+			_modelstate.Anim = (_modelstate.Anim + (back? -1 : 1));
+			_modelstate.Anim = Math.Min(LoadedAsset.anims.Count() - 1, Math.Max(_modelstate.Anim, 0));
+		}
 		internal ModelState GetModelState()
 		{
-			_modelstate.Frame = (int)Math.Floor(_time.Elapsed.TotalSeconds * 10) % LoadedAsset.FrameCount;
+			_modelstate.Frame = LoadedAsset.anims[_modelstate.Anim].first + 
+				((int)Math.Floor(_time.Elapsed.TotalSeconds * 10) % (LoadedAsset.anims[_modelstate.Anim].frameCount));
 			return _modelstate;
 		}
 	}

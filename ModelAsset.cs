@@ -8,6 +8,7 @@ using OpenTK.Mathematics;
 using System.Runtime.Remoting;
 using System.Windows.Media.Animation;
 using System.Diagnostics;
+using System.Xaml;
 
 namespace yaqmv
 {
@@ -40,16 +41,32 @@ namespace yaqmv
 				for (int i = 0; i < header.trianglecount; i++)
 					tris[i] = new Triangle(mdlfile, header);
 
-				frames = new Frame[header.framecount];
+				List<Frame> framelist = new List<Frame>();
+				List<Anim> animlist = new List<Anim>();
 				for (int i = 0; i < header.framecount; i++)
 				{
 					group = mdlfile.ReadInt32();
 					if (group != 0)
 					{
-						// TODO handle framegroup accordingly
 					}
-					frames[i] = new Frame(mdlfile, header);
+					else
+					{
+						framelist.Add(new Frame(mdlfile, header));
+						if (animlist.Count > 0 && framelist.Last().NamePrefix == animlist.Last().name)
+						{
+							animlist.Last().frameCount++;
+							animlist.Last().last++;
+						}
+						else
+						{
+							animlist.Add(new Anim(framelist.Last().NamePrefix, framelist.Count-1));
+						}
+					}
+
 				}
+				frames = framelist.ToArray();
+				anims = animlist.ToArray();
+				TotalFrameCount = framelist.Count;
 				Debug.Assert(mdlfile.BaseStream.Position == mdlfile.BaseStream.Length, "didn't read the entire file for some reason");
 			}
 		}
@@ -144,25 +161,54 @@ namespace yaqmv
 		}
 		internal class Coord
 		{
-			public (byte, byte, byte) origin_compressed;
-			public byte normal_compressed;
+			public (byte, byte, byte) originCompressed;
+			public byte normalCompressed;
 			public Coord(BinaryReader mdl)
 			{ 
-				origin_compressed = (mdl.ReadByte(), mdl.ReadByte(), mdl.ReadByte());
-				normal_compressed = mdl.ReadByte();
+				originCompressed = (mdl.ReadByte(), mdl.ReadByte(), mdl.ReadByte());
+				normalCompressed = mdl.ReadByte();
 			}
 			public Vector3 UncompressedOrigin(ModelAsset mdl)
 			{
-				return new Vector3(origin_compressed.Item1 * mdl.Scale[0] + mdl.Origin[0],
-					origin_compressed.Item2 * mdl.Scale[1] + mdl.Origin[1],
-					origin_compressed.Item3 * mdl.Scale[2] + mdl.Origin[2]);
+				return new Vector3(originCompressed.Item1 * mdl.Scale[0] + mdl.Origin[0],
+					originCompressed.Item2 * mdl.Scale[1] + mdl.Origin[1],
+					originCompressed.Item3 * mdl.Scale[2] + mdl.Origin[2]);
 			}
 		}
+		internal class Anim
+		{
+			// anims are either actual framegroups or just frames named
+			// with the same prefix that we spiritually group together
+			public string name;
+			public Coord mins, maxs;
+			public int frameCount;
+			public int first, last;
+			public bool isGroup;
+
+			public Anim(string prefix, int startframe, bool grp = false, int endframe = -1)
+			{
+				name = prefix;
+				first = startframe;
+				isGroup = grp;
+				if (grp)
+				{
+					last = endframe;
+					frameCount = endframe - startframe + 1;
+				}
+				else
+				{
+					last = first;
+					frameCount = 1;
+				}
+			}
+		}
+
 		internal class Frame
 		{
 			public Coord mins, maxs;
 			public string name;
 			public Coord[] positions;
+			public float duration;
 
 			public Frame(BinaryReader mdl, Header h)
 			{
@@ -176,6 +222,7 @@ namespace yaqmv
 					positions[i] = new Coord(mdl);
 				}
 			}
+			public string NamePrefix { get { return name.TrimEnd(new char[] { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' }); } }
 		}
 
 		Header header;
@@ -183,6 +230,7 @@ namespace yaqmv
 		internal Vertex[] verts;
 		internal Triangle[] tris;
 		internal Frame[] frames;
+		internal Anim[] anims;
 
 		internal int SkinCount { get { return header.skincount; } }
 		internal int SkinWidth { get { return header.skinwidth; } }
@@ -190,6 +238,7 @@ namespace yaqmv
 		internal int VertexCount { get { return header.vertexcount; } }
 		internal int TriangleCount { get { return header.trianglecount; } }
 		internal int FrameCount { get { return header.framecount; } }
+		private int TotalFrameCount { get; }
 		internal Vector3 Scale { get { return header.scale; } }
 		internal Vector3 Origin { get { return header.origin; } }
 

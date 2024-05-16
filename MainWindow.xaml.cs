@@ -56,6 +56,10 @@ namespace yaqmv
 
 			_mousepos = newpos;
 		}
+		private void MWOnMouseWheel(object sender, MouseWheelEventArgs e)
+		{
+			YAQMVApp.App.CycleAnim((e.Delta > 0));
+		}
 		private void MWOnKeyDown(object sender, KeyEventArgs e)
 		{
 			if (e.Key == Key.F)

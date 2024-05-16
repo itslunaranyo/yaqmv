@@ -25,7 +25,9 @@
 				SizeChanged="MWOnSizeChanged"
 				Unloaded="MWOnUnload"
 				KeyDown="MWOnKeyDown"
-				MouseMove="MWOnMouseMove" Grid.Row="1"
+				MouseMove="MWOnMouseMove"
+				MouseWheel="MWOnMouseWheel"
+				Grid.Row="1"
 			/>
 	</Grid>
 </Window>
