@@ -42,10 +42,14 @@ namespace yaqmv
 		}
 		internal void CycleAnim(bool back)
 		{
-			_time.Restart();
 			if (LoadedAsset == null) return;
-			_modelstate.Anim = (_modelstate.Anim + (back? -1 : 1));
-			_modelstate.Anim = Math.Min(LoadedAsset.anims.Count() - 1, Math.Max(_modelstate.Anim, 0));
+
+			int a = _modelstate.Anim;
+			a = (a + (back? -1 : 1));
+			a = Math.Min(LoadedAsset.anims.Count() - 1, Math.Max(a, 0));
+			if (a != _modelstate.Anim)
+				_time.Restart();
+			_modelstate.Anim = a;
 		}
 		internal ModelState GetModelState()
 		{
