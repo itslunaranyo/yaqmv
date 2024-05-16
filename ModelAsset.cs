@@ -6,17 +6,50 @@ using System.IO;
 using OpenTK.Mathematics;
 using System.Diagnostics;
 using System.Xaml;
+using System.Collections.ObjectModel;
 
 namespace yaqmv
 {
 	internal class ModelAsset
 	{
+		Header header;
+		internal Skin[] skins;
+		internal Vertex[] verts;
+		internal Triangle[] tris;
+		internal Frame[] frames;
+		internal Anim[] anims;
+		internal ObservableCollection<string> AnimNames = new ObservableCollection<string>();
+
+		internal int SkinCount { get { return header.skincount; } }
+		internal int SkinWidth { get { return header.skinwidth; } }
+		internal int SkinHeight { get { return header.skinheight; } }
+		internal int VertexCount { get { return header.vertexcount; } }
+		internal int TriangleCount { get { return header.trianglecount; } }
+		internal int FrameCount { get { return header.framecount; } }
+		private int TotalFrameCount { get; }
+		internal Vector3 Scale { get { return header.scale; } }
+		internal Vector3 Origin { get { return header.origin; } }
+
+		public ModelAsset()
+		{
+			header = new Header();
+			skins = Array.Empty<Skin>();
+			verts = Array.Empty<Vertex>();
+			tris = Array.Empty<Triangle>();
+			frames = Array.Empty<Frame>();
+			anims = Array.Empty<Anim>();
+			TotalFrameCount = 0;
+
+			AnimNames.Clear();
+		}
+
 		internal ModelAsset(string mdlpath)
 		{
 			using (var mdlfile = new BinaryReader(File.OpenRead(mdlpath), Encoding.ASCII))
 			{
-				header = new Header(mdlfile);
 				float group;
+
+				header = new Header(mdlfile);
 
 				// TODO test Enumerable.Repeat for stability on these
 				skins = new Skin[header.skincount];
@@ -77,6 +110,11 @@ namespace yaqmv
 				frames = framelist.ToArray();
 				anims = animlist.ToArray();
 				TotalFrameCount = framelist.Count;
+
+				AnimNames.Clear();
+				foreach (var anim in anims)
+					AnimNames.Add(anim.name);
+
 				Debug.Assert(mdlfile.BaseStream.Position == mdlfile.BaseStream.Length, "didn't read the entire file for some reason");
 			}
 		}
@@ -128,6 +166,24 @@ namespace yaqmv
 
 				if (skinheight <= 0)
 					throw new Exception("mdl file has invalid skinheight");
+			}
+			public Header()
+			{
+				ident = new char[]{ 'l','o','l','.' };
+				version = 0;
+				scale = new Vector3(0);
+				origin = new Vector3(0);
+				radius = 0;
+				eyepos = new Vector3(0);
+				skincount = 0;
+				skinwidth = 0;
+				skinheight = 0;
+				vertexcount = 0;
+				trianglecount = 0;
+				framecount = 0;
+				synctype = 0;
+				flags = 0;
+				average_size = 0;
 			}
 		};
 		internal class Skin
@@ -234,23 +290,6 @@ namespace yaqmv
 			}
 			public string NamePrefix { get { return name.TrimEnd(new char[] { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' }); } }
 		}
-
-		Header header;
-		internal Skin[] skins;
-		internal Vertex[] verts;
-		internal Triangle[] tris;
-		internal Frame[] frames;
-		internal Anim[] anims;
-
-		internal int SkinCount { get { return header.skincount; } }
-		internal int SkinWidth { get { return header.skinwidth; } }
-		internal int SkinHeight { get { return header.skinheight; } }
-		internal int VertexCount { get { return header.vertexcount; } }
-		internal int TriangleCount { get { return header.trianglecount; } }
-		internal int FrameCount { get { return header.framecount; } }
-		private int TotalFrameCount { get; }
-		internal Vector3 Scale { get { return header.scale; } }
-		internal Vector3 Origin { get { return header.origin; } }
 
 		internal Vector3 CenterOfFrame(int frame)
 		{

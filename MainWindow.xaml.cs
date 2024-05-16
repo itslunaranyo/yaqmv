@@ -20,21 +20,25 @@ namespace yaqmv
 	/// </summary>
 	public partial class MainWindow : Window
 	{
-		ModelWindow _mw;
-		ObservableCollection<string> AnimNames = new ObservableCollection<string>();
+		internal ModelWindow _mw;
+		internal ModelAsset LoadedAsset;
+		internal ModelState _modelstate;
+		private Stopwatch _time;
+
 		public MainWindow()
 		{
 			InitializeComponent();
 
 			_mw = (ModelWindow)FindName("ModelWindow");
+			LoadedAsset = new ModelAsset();
+			_time = new Stopwatch();
 		}
 		private void Window_Loaded(object sender, RoutedEventArgs e)
 		{
-			AnimSelect.ItemsSource = AnimNames;
 		}
 
 
-		internal static MainWindow Win { get { return (MainWindow)Application.Current.MainWindow; } }
+		internal static MainWindow Get { get { return (MainWindow)Application.Current.MainWindow; } }
 
 		private void MWOnSizeChanged(object sender, SizeChangedEventArgs e) { _mw.OnSizeChanged(sender, e); }
 		private void MWOnRender(TimeSpan delta) { _mw.OnRender(delta); }
@@ -42,11 +46,24 @@ namespace yaqmv
 
 		internal void Display(ModelAsset mdl)
 		{
-			_mw.LoadModel(mdl);
-			AnimNames.Clear();
-			foreach (var anim in mdl.anims)
-				AnimNames.Add(anim.name);
+			_modelstate = new ModelState();
+			AnimSelect.ItemsSource = LoadedAsset.AnimNames;
 			AnimSelect.SelectedIndex = 0;
+			_mw.LoadModel(mdl);
+		}
+
+		internal ModelState GetModelState()
+		{
+			_modelstate.Frame = LoadedAsset.anims[_modelstate.Anim].first +
+				((int)Math.Floor(_time.Elapsed.TotalSeconds * 10) % (LoadedAsset.anims[_modelstate.Anim].frameCount));
+			return _modelstate;
+		}
+
+		private void SelectAnim(int a)
+		{
+			if (a != _modelstate.Anim)
+				_time.Restart();
+			_modelstate.Anim = a;
 		}
 
 		// =====================
@@ -70,37 +87,43 @@ namespace yaqmv
 		}
 		private void MWOnMouseWheel(object sender, MouseWheelEventArgs e)
 		{
-			YAQMVApp.App.CycleAnim((e.Delta > 0));
+			int a = _modelstate.Anim;
+			a = (a + ((e.Delta > 0) ? -1 : 1));
+			a = Math.Min(LoadedAsset.anims.Count() - 1, Math.Max(a, 0));
+			SelectAnim(a);
 		}
 		private void MWOnKeyDown(object sender, KeyEventArgs e)
 		{
 			if (e.Key == Key.F)
 			{
-				YAQMVApp.App.Focus();
+				Camera.Recenter(LoadedAsset.CenterOfFrame(0), LoadedAsset.RadiusOfFrame(0));
 			}
 			if (e.Key == Key.K)
 			{
-				YAQMVApp.App.CycleSkin();
+				_modelstate.Skin = (_modelstate.Skin + 1) % LoadedAsset.SkinCount;
 			}
 		}
 
-		private void MenuFileQuit(object sender, RoutedEventArgs e)
-		{
-			Close();
-		}
 		private void MenuFileOpen(object sender, RoutedEventArgs e)
 		{
 			OpenFileDialog openFileDialog = new OpenFileDialog();
 			openFileDialog.Filter = "Quake model files (*.mdl)|*.mdl|All files (*.*)|*.*";
 			if (openFileDialog.ShowDialog() == true)
 			{
-				YAQMVApp.App.LoadAsset(openFileDialog.FileName);
+				_time.Restart();
+				LoadedAsset = new ModelAsset(openFileDialog.FileName);
+
+				Display(LoadedAsset);
 			}
+		}
+		private void MenuFileQuit(object sender, RoutedEventArgs e)
+		{
+			Close();
 		}
 
 		private void AnimSelect_SelectionChanged(object sender, SelectionChangedEventArgs e)
 		{
-			YAQMVApp.App.SelectAnim(AnimSelect.SelectedIndex);
+			SelectAnim(AnimSelect.SelectedIndex);
 		}
 	}
 }
