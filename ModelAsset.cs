@@ -3,10 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.IO;
-using System.Threading.Tasks;
 using OpenTK.Mathematics;
-using System.Runtime.Remoting;
-using System.Windows.Media.Animation;
 using System.Diagnostics;
 using System.Xaml;
 
@@ -41,13 +38,26 @@ namespace yaqmv
 				for (int i = 0; i < header.trianglecount; i++)
 					tris[i] = new Triangle(mdlfile, header);
 
-				List<Frame> framelist = new List<Frame>();
+				List<Frame> framelist = new List<Frame>(header.framecount);
 				List<Anim> animlist = new List<Anim>();
 				for (int i = 0; i < header.framecount; i++)
 				{
 					group = mdlfile.ReadInt32();
 					if (group != 0)
 					{
+						animlist.Add(new Anim("_temp_framegroup", framelist.Count, true, framelist.Count + mdlfile.ReadInt32()-1));
+						var anim = animlist.Last();
+
+						anim.mins = new Coord(mdlfile);
+						anim.maxs = new Coord(mdlfile);
+
+						List<float> durations = new List<float>(anim.frameCount);
+						for (int j = 0; j < anim.frameCount; j++)
+							durations.Add(mdlfile.ReadSingle());
+						for (int j = 0; j < anim.frameCount; j++)
+							framelist.Add(new Frame(mdlfile, header));
+
+						anim.name = framelist.Last().NamePrefix;
 					}
 					else
 					{
