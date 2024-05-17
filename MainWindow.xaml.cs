@@ -14,13 +14,14 @@ using Microsoft.Win32;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using static yaqmv.ModelAsset;
+using System.Runtime.CompilerServices;
 
 namespace yaqmv
 {
 	/// <summary>
 	/// Interaction logic for MainWindow.xaml
 	/// </summary>
-	public partial class MainWindow : Window
+	public partial class MainWindow : Window, INotifyPropertyChanged
 	{
 		internal ModelWindow _mw;
 		internal ModelAsset _loadedAsset;
@@ -38,6 +39,9 @@ namespace yaqmv
 		}
 		private void Window_Loaded(object sender, RoutedEventArgs e)
 		{
+			NotifyPropertyChanged("StatsText");
+			NotifyPropertyChanged("AnimStatsText");
+			NotifyPropertyChanged("CurrentFrameText");
 		}
 
 
@@ -50,22 +54,19 @@ namespace yaqmv
 		internal void Display(ModelAsset mdl)
 		{
 			_modelstate = new ModelState();
+			_mw.LoadModel(mdl);
+			SelectAnim(0);
 			AnimSelect.ItemsSource = _loadedAsset.AnimNames;
 			AnimSelect.SelectedIndex = 0;
 			SkinSelect.ItemsSource = _loadedAsset.SkinNames;
 			SkinSelect.SelectedIndex = 0;
-			_mw.LoadModel(mdl);
-
-			TStats.Text = "Vertices: " + _loadedAsset.VertexCount.ToString() +
-						"\nTriangles: " + _loadedAsset.TriangleCount.ToString() +
-						"\nFrames: " + _loadedAsset.FrameCount.ToString() +
-						"\nSkins: " + _loadedAsset.SkinCount.ToString();
+			NotifyPropertyChanged("StatsText");
+			NotifyPropertyChanged("AnimStatsText");
+			NotifyPropertyChanged("CurrentFrameText");
 		}
 
 		internal ModelState GetModelState()
 		{
-			_modelstate.Frame = _loadedAsset.anims[_modelstate.Anim].first +
-				((int)Math.Floor(_time.Elapsed.TotalSeconds * 10) % (_loadedAsset.anims[_modelstate.Anim].frameCount));
 			return _modelstate;
 		}
 
@@ -75,16 +76,60 @@ namespace yaqmv
 				_time.Restart();
 			_modelstate.Anim = a;
 
-			TAnimStats.Text = "Sequence #: " + a.ToString() +
+			Timeline.Value = _loadedAsset.anims[_modelstate.Anim].first;
+			NotifyPropertyChanged("TimelineMin");
+			NotifyPropertyChanged("TimelineMax");
+			NotifyPropertyChanged("AnimStatsText");
+			NotifyPropertyChanged("CurrentFrameText");
+		}
+		public int SelectedSkin
+		{
+			get { return _modelstate.Skin; }
+			set { _modelstate.Skin = value; }
+		}
+
+
+
+		// =====================
+		// PROPERTIES
+		// =====================
+
+		public int TimelineValue { 
+			get { return _modelstate.Frame; } 
+			set { 
+				_modelstate.Frame = value; 
+			} 
+		}
+		public int TimelineMin { get { return _loadedAsset.anims[_modelstate.Anim].first; } }
+		public int TimelineMax { get { return _loadedAsset.anims[_modelstate.Anim].last; } }
+
+		public string StatsText { get { 
+			return "Vertices: " + _loadedAsset.VertexCount.ToString() +
+				"\nTriangles: " + _loadedAsset.TriangleCount.ToString() +
+				"\nFrames: " + _loadedAsset.FrameCount.ToString() +
+				"\nSkins: " + _loadedAsset.SkinCount.ToString();
+			}
+		}
+		public string AnimStatsText { get {
+			return "Sequence #: " + _modelstate.Anim.ToString() +
 				"\nFrames: " + (_loadedAsset.anims[_modelstate.Anim].last - _loadedAsset.anims[_modelstate.Anim].first + 1).ToString() +
 				" (" + _loadedAsset.anims[_modelstate.Anim].first.ToString() +
 				"-" + _loadedAsset.anims[_modelstate.Anim].last.ToString() + ")";
+			}
 		}
-		private void SelectSkin(int s)
-		{
-			_modelstate.Skin = s;
+		public string CurrentFrameText { get {
+			int ftime = ((int)Timeline.Value > _loadedAsset.frames.Length) ? 0 : (int)Timeline.Value;
+			return "Current: " + _loadedAsset.frames[ftime].name + 
+				" (" + ftime.ToString() + ")";
+			}
 		}
 
+		public event PropertyChangedEventHandler? PropertyChanged;
+		private void NotifyPropertyChanged(String propertyName)
+		{
+			PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+		}
+		
 		// =====================
 		// INPUT
 		// =====================
@@ -147,7 +192,12 @@ namespace yaqmv
 
 		private void SkinSelect_SelectionChanged(object sender, SelectionChangedEventArgs e)
 		{
-			SelectSkin(SkinSelect.SelectedIndex == -1 ? 0 : SkinSelect.SelectedIndex);
+			SelectedSkin = SkinSelect.SelectedIndex == -1 ? 0 : SkinSelect.SelectedIndex;
+		}
+
+		private void Timeline_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+		{
+			NotifyPropertyChanged("CurrentFrameText");
 		}
 	}
 }

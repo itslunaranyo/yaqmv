@@ -7,12 +7,13 @@
         xmlns:local="clr-namespace:yaqmv"
         mc:Ignorable="d"
 		Loaded="Window_Loaded"
-        Title="YAQ Model Viewer" Height="720" Width="600">
+        Title="YAQ Model Viewer" Height="720" Width="540">
 	<Grid Background="#FFDFDFDF">
 		<Grid.RowDefinitions>
 			<RowDefinition Height="Auto" />
 			<RowDefinition Height="*" />
-			<RowDefinition Height="150" />
+			<RowDefinition Height="120" />
+			<RowDefinition Height="40" />
 		</Grid.RowDefinitions>
 		<Menu VerticalAlignment="Top">
 			<MenuItem Header="_File">
@@ -48,9 +49,11 @@
 							  IsReadOnly="True"
 							  SelectionChanged="AnimSelect_SelectionChanged"/>
 				</WrapPanel>
+				<WrapPanel Height="40">
+					<TextBlock x:Name="TAnimStats" Text="{Binding AnimStatsText}"/>
+				</WrapPanel>
 				<WrapPanel>
-					<TextBlock Text="" />
-					<TextBlock x:Name="TAnimStats" />
+					<TextBlock x:Name="TCurrentFrame" Text="{Binding CurrentFrameText}"/>
 				</WrapPanel>
 			</StackPanel>
 			<StackPanel Margin="8" Grid.Column="2">
@@ -62,9 +65,37 @@
 							  SelectionChanged="SkinSelect_SelectionChanged"/>
 				</WrapPanel>
 				<WrapPanel>
-					<TextBlock x:Name="TStats" />
+					<TextBlock x:Name="TStats" Text="{Binding StatsText}"/>
 				</WrapPanel>
 			</StackPanel>
 		</Grid>
+		<WrapPanel	Grid.Row="3" HorizontalAlignment="Left" VerticalAlignment="Top">
+			<Button x:Name="BStart" Content="⏮"
+				HorizontalAlignment="Left"
+				Margin="10,6,0,6"			
+				VerticalAlignment="Top" FontFamily="Segoe UI Symbol" Width="28" Height="28" FontSize="16" BorderThickness="1,1,1,1"/>
+			
+			<Slider x:Name="Timeline" 
+				VerticalAlignment="Center" 
+				HorizontalAlignment="Left" 
+				Width="400" 
+				IsSnapToTickEnabled="True"
+				Margin="6,6,6,6"
+				TickPlacement="BottomRight"
+				Value="{Binding TimelineValue}"
+				Minimum="{Binding TimelineMin}"
+				Maximum="{Binding TimelineMax}"
+				ValueChanged="Timeline_ValueChanged"
+				/>
+			
+			<Button x:Name="BPlay" Content="▶"
+				HorizontalAlignment="Left"
+				Margin="0,6,0,6"
+				VerticalAlignment="Top" FontFamily="Segoe UI Symbol" Width="28" Height="28" FontSize="16" BorderThickness="1,1,1,1"/>
+			<Button x:Name="BEnd" Content="⏭"
+				HorizontalAlignment="Left"
+				Margin="6,6,10,6"
+				VerticalAlignment="Top" FontFamily="Segoe UI Symbol" Width="28" Height="28" FontSize="16" BorderThickness="1,1,1,1"/>
+		</WrapPanel>
 	</Grid>
 </Window>
