@@ -12,6 +12,8 @@ using System.Diagnostics;
 using System.Drawing;
 using Microsoft.Win32;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
+using static yaqmv.ModelAsset;
 
 namespace yaqmv
 {
@@ -21,16 +23,17 @@ namespace yaqmv
 	public partial class MainWindow : Window
 	{
 		internal ModelWindow _mw;
-		internal ModelAsset LoadedAsset;
+		internal ModelAsset _loadedAsset;
 		internal ModelState _modelstate;
 		private Stopwatch _time;
 
 		public MainWindow()
 		{
 			InitializeComponent();
+			DataContext = this;
 
 			_mw = (ModelWindow)FindName("ModelWindow");
-			LoadedAsset = new ModelAsset();
+			_loadedAsset = new ModelAsset();
 			_time = new Stopwatch();
 		}
 		private void Window_Loaded(object sender, RoutedEventArgs e)
@@ -47,15 +50,22 @@ namespace yaqmv
 		internal void Display(ModelAsset mdl)
 		{
 			_modelstate = new ModelState();
-			AnimSelect.ItemsSource = LoadedAsset.AnimNames;
+			AnimSelect.ItemsSource = _loadedAsset.AnimNames;
 			AnimSelect.SelectedIndex = 0;
+			SkinSelect.ItemsSource = _loadedAsset.SkinNames;
+			SkinSelect.SelectedIndex = 0;
 			_mw.LoadModel(mdl);
+
+			TStats.Text = "Vertices: " + _loadedAsset.VertexCount.ToString() +
+						"\nTriangles: " + _loadedAsset.TriangleCount.ToString() +
+						"\nFrames: " + _loadedAsset.FrameCount.ToString() +
+						"\nSkins: " + _loadedAsset.SkinCount.ToString();
 		}
 
 		internal ModelState GetModelState()
 		{
-			_modelstate.Frame = LoadedAsset.anims[_modelstate.Anim].first +
-				((int)Math.Floor(_time.Elapsed.TotalSeconds * 10) % (LoadedAsset.anims[_modelstate.Anim].frameCount));
+			_modelstate.Frame = _loadedAsset.anims[_modelstate.Anim].first +
+				((int)Math.Floor(_time.Elapsed.TotalSeconds * 10) % (_loadedAsset.anims[_modelstate.Anim].frameCount));
 			return _modelstate;
 		}
 
@@ -64,6 +74,15 @@ namespace yaqmv
 			if (a != _modelstate.Anim)
 				_time.Restart();
 			_modelstate.Anim = a;
+
+			TAnimStats.Text = "Sequence #: " + a.ToString() +
+				"\nFrames: " + (_loadedAsset.anims[_modelstate.Anim].last - _loadedAsset.anims[_modelstate.Anim].first + 1).ToString() +
+				" (" + _loadedAsset.anims[_modelstate.Anim].first.ToString() +
+				"-" + _loadedAsset.anims[_modelstate.Anim].last.ToString() + ")";
+		}
+		private void SelectSkin(int s)
+		{
+			_modelstate.Skin = s;
 		}
 
 		// =====================
@@ -89,18 +108,18 @@ namespace yaqmv
 		{
 			int a = _modelstate.Anim;
 			a = (a + ((e.Delta > 0) ? -1 : 1));
-			a = Math.Min(LoadedAsset.anims.Count() - 1, Math.Max(a, 0));
+			a = Math.Min(_loadedAsset.anims.Count() - 1, Math.Max(a, 0));
 			SelectAnim(a);
 		}
 		private void MWOnKeyDown(object sender, KeyEventArgs e)
 		{
 			if (e.Key == Key.F)
 			{
-				Camera.Recenter(LoadedAsset.CenterOfFrame(0), LoadedAsset.RadiusOfFrame(0));
+				Camera.Recenter(_loadedAsset.CenterOfFrame(0), _loadedAsset.RadiusOfFrame(0));
 			}
 			if (e.Key == Key.K)
 			{
-				_modelstate.Skin = (_modelstate.Skin + 1) % LoadedAsset.SkinCount;
+				_modelstate.Skin = (_modelstate.Skin + 1) % _loadedAsset.SkinCount;
 			}
 		}
 
@@ -111,9 +130,9 @@ namespace yaqmv
 			if (openFileDialog.ShowDialog() == true)
 			{
 				_time.Restart();
-				LoadedAsset = new ModelAsset(openFileDialog.FileName);
+				_loadedAsset = new ModelAsset(openFileDialog.FileName);
 
-				Display(LoadedAsset);
+				Display(_loadedAsset);
 			}
 		}
 		private void MenuFileQuit(object sender, RoutedEventArgs e)
@@ -123,7 +142,12 @@ namespace yaqmv
 
 		private void AnimSelect_SelectionChanged(object sender, SelectionChangedEventArgs e)
 		{
-			SelectAnim(AnimSelect.SelectedIndex);
+			SelectAnim(AnimSelect.SelectedIndex == -1 ? 0 : AnimSelect.SelectedIndex);
+		}
+
+		private void SkinSelect_SelectionChanged(object sender, SelectionChangedEventArgs e)
+		{
+			SelectSkin(SkinSelect.SelectedIndex == -1 ? 0 : SkinSelect.SelectedIndex);
 		}
 	}
 }

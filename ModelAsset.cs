@@ -7,6 +7,7 @@ using OpenTK.Mathematics;
 using System.Diagnostics;
 using System.Xaml;
 using System.Collections.ObjectModel;
+using System.Security.Cryptography;
 
 namespace yaqmv
 {
@@ -19,6 +20,7 @@ namespace yaqmv
 		internal Frame[] frames;
 		internal Anim[] anims;
 		internal ObservableCollection<string> AnimNames = new ObservableCollection<string>();
+		internal ObservableCollection<string> SkinNames = new ObservableCollection<string>();
 
 		internal int SkinCount { get { return header.skincount; } }
 		internal int SkinWidth { get { return header.skinwidth; } }
@@ -36,11 +38,12 @@ namespace yaqmv
 			skins = Array.Empty<Skin>();
 			verts = Array.Empty<Vertex>();
 			tris = Array.Empty<Triangle>();
-			frames = Array.Empty<Frame>();
-			anims = Array.Empty<Anim>();
+			frames = [new Frame()];
+			anims = [new Anim()];
 			TotalFrameCount = 0;
 
 			AnimNames.Clear();
+			SkinNames.Clear();
 		}
 
 		internal ModelAsset(string mdlpath)
@@ -48,12 +51,13 @@ namespace yaqmv
 			using (var mdlfile = new BinaryReader(File.OpenRead(mdlpath), Encoding.ASCII))
 			{
 				float group;
+				int i;
 
 				header = new Header(mdlfile);
 
 				// TODO test Enumerable.Repeat for stability on these
 				skins = new Skin[header.skincount];
-				for (int i = 0; i < header.skincount; i++)
+				for (i = 0; i < header.skincount; i++)
 				{
 					group = mdlfile.ReadInt32();
 					if (group != 0)
@@ -64,16 +68,16 @@ namespace yaqmv
 				}
 
 				verts = new Vertex[header.vertexcount];
-				for (int i = 0; i < header.vertexcount; i++)
+				for (i = 0; i < header.vertexcount; i++)
 					verts[i] = new Vertex(mdlfile, header);
 
 				tris = new Triangle[header.trianglecount];
-				for (int i = 0; i < header.trianglecount; i++)
+				for (i = 0; i < header.trianglecount; i++)
 					tris[i] = new Triangle(mdlfile, header);
 
 				List<Frame> framelist = new List<Frame>(header.framecount);
 				List<Anim> animlist = new List<Anim>();
-				for (int i = 0; i < header.framecount; i++)
+				for (i = 0; i < header.framecount; i++)
 				{
 					group = mdlfile.ReadInt32();
 					if (group != 0)
@@ -114,6 +118,11 @@ namespace yaqmv
 				AnimNames.Clear();
 				foreach (var anim in anims)
 					AnimNames.Add(anim.name);
+
+				SkinNames.Clear();
+				i = 0;
+				foreach (var skin in skins)
+					SkinNames.Add("Skin " + (i++).ToString());
 
 				Debug.Assert(mdlfile.BaseStream.Position == mdlfile.BaseStream.Length, "didn't read the entire file for some reason");
 			}
@@ -229,6 +238,11 @@ namespace yaqmv
 		{
 			public (byte, byte, byte) originCompressed;
 			public byte normalCompressed;
+			public Coord()
+			{
+				originCompressed = (0, 0, 0);
+				normalCompressed = 0;
+			}
 			public Coord(BinaryReader mdl)
 			{ 
 				originCompressed = (mdl.ReadByte(), mdl.ReadByte(), mdl.ReadByte());
@@ -251,6 +265,15 @@ namespace yaqmv
 			public int first, last;
 			public bool isGroup;
 
+			public Anim()
+			{
+				name = "";
+				mins = new Coord();
+				maxs = new Coord();
+				frameCount = 0;
+				first = last = 0;
+				isGroup = false;
+			}
 			public Anim(string prefix, int startframe, bool grp = false, int endframe = -1)
 			{
 				name = prefix;
@@ -276,6 +299,13 @@ namespace yaqmv
 			public Coord[] positions;
 			public float duration;
 
+			public Frame()
+			{
+				mins = new Coord();
+				maxs = new Coord();
+				name = "";
+				positions = new Coord[] { };
+			}
 			public Frame(BinaryReader mdl, Header h)
 			{
 				mins = new Coord(mdl);

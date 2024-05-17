@@ -12,7 +12,7 @@
 		<Grid.RowDefinitions>
 			<RowDefinition Height="Auto" />
 			<RowDefinition Height="*" />
-			<RowDefinition Height="180" />
+			<RowDefinition Height="150" />
 		</Grid.RowDefinitions>
 		<Menu VerticalAlignment="Top">
 			<MenuItem Header="_File">
@@ -32,16 +32,37 @@
 				Grid.Row="1"
 			/>
 		<Grid Grid.Row="2">
+			<Grid.ColumnDefinitions>
+				<ColumnDefinition Width="160"/>
+				<ColumnDefinition/>
+				<ColumnDefinition Width="100"/>
+			</Grid.ColumnDefinitions>
 			<Grid.RowDefinitions>
 				<RowDefinition Height="*" />
 			</Grid.RowDefinitions>
 			<StackPanel Margin="8">
 				<WrapPanel>
-					<TextBox Text="Sequence: " Background="{x:Null}" BorderBrush="{x:Null}" />
+					<TextBlock Text="Sequence:" />
 					<ComboBox x:Name="AnimSelect" 
-							  Width="128" 
+							  Width="144" 
 							  IsReadOnly="True"
 							  SelectionChanged="AnimSelect_SelectionChanged"/>
+				</WrapPanel>
+				<WrapPanel>
+					<TextBlock Text="" />
+					<TextBlock x:Name="TAnimStats" />
+				</WrapPanel>
+			</StackPanel>
+			<StackPanel Margin="8" Grid.Column="2">
+				<WrapPanel>
+					<TextBlock Text="Skin:" />
+					<ComboBox x:Name="SkinSelect" 
+							  Width="80" 
+							  IsReadOnly="True"
+							  SelectionChanged="SkinSelect_SelectionChanged"/>
+				</WrapPanel>
+				<WrapPanel>
+					<TextBlock x:Name="TStats" />
 				</WrapPanel>
 			</StackPanel>
 		</Grid>
