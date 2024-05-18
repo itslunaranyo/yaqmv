@@ -27,6 +27,7 @@ namespace yaqmv
 			shader = new Shader("shaders/default_v.shader", "shaders/default_f.shader");
 
 			CurrentAsset = mdl;
+			CurrentModel?.Dispose();
 			CurrentModel = ModelConvertor.Convert(mdl, shader);
 			Skins = new Texture[mdl.SkinCount];
 			for(int i = 0; i < mdl.SkinCount; i++)
@@ -62,6 +63,7 @@ namespace yaqmv
 		{
 			if (_disposed) return;
 			shader.Dispose();
+			CurrentModel?.Dispose();
 			_disposed = true;
 		}
 	}
