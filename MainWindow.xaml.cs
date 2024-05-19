@@ -61,8 +61,6 @@ namespace yaqmv
 			SkinSelect.ItemsSource = _loadedAsset.SkinNames;
 			SkinSelect.SelectedIndex = 0;
 			NotifyPropertyChanged("StatsText");
-			NotifyPropertyChanged("AnimStatsText");
-			NotifyPropertyChanged("CurrentFrameText");
 		}
 
 		internal ModelState GetModelState()
@@ -80,7 +78,6 @@ namespace yaqmv
 			NotifyPropertyChanged("TimelineMin");
 			NotifyPropertyChanged("TimelineMax");
 			NotifyPropertyChanged("AnimStatsText");
-			NotifyPropertyChanged("CurrentFrameText");
 		}
 		public int SelectedSkin
 		{
@@ -97,7 +94,9 @@ namespace yaqmv
 		public int TimelineValue { 
 			get { return _modelstate.Frame; } 
 			set { 
-				_modelstate.Frame = value; 
+				_modelstate.Frame = value;
+				NotifyPropertyChanged("TimelineValue");
+				NotifyPropertyChanged("CurrentFrameText");
 			} 
 		}
 		public int TimelineMin { get { return _loadedAsset.anims[_modelstate.Anim].first; } }
@@ -151,10 +150,10 @@ namespace yaqmv
 		}
 		private void MWOnMouseWheel(object sender, MouseWheelEventArgs e)
 		{
-			int a = _modelstate.Anim;
+			int a = _modelstate.Frame;
 			a = (a + ((e.Delta > 0) ? -1 : 1));
-			a = Math.Min(_loadedAsset.anims.Count() - 1, Math.Max(a, 0));
-			SelectAnim(a);
+			a = Math.Min(_loadedAsset.anims[_modelstate.Anim].last, Math.Max(a, _loadedAsset.anims[_modelstate.Anim].first));
+			TimelineValue = a;
 		}
 		private void MWOnKeyDown(object sender, KeyEventArgs e)
 		{
@@ -197,7 +196,7 @@ namespace yaqmv
 
 		private void Timeline_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
 		{
-			NotifyPropertyChanged("CurrentFrameText");
+			//NotifyPropertyChanged("CurrentFrameText");
 		}
 	}
 }

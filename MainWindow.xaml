@@ -82,7 +82,7 @@
 				IsSnapToTickEnabled="True"
 				Margin="6,6,6,6"
 				TickPlacement="BottomRight"
-				Value="{Binding TimelineValue}"
+				Value="{Binding TimelineValue, Mode=TwoWay}"
 				Minimum="{Binding TimelineMin}"
 				Maximum="{Binding TimelineMax}"
 				ValueChanged="Timeline_ValueChanged"
