@@ -142,7 +142,7 @@ namespace yaqmv
 			if (Mouse.LeftButton == MouseButtonState.Pressed)
 				Camera.Orbit((float)delta.X, (float)delta.Y);
 			else if (Mouse.RightButton == MouseButtonState.Pressed)
-				Camera.Dolly((float)delta.X + (float)delta.Y);
+				Camera.Dolly(-(float)delta.Y);
 			else if (Mouse.MiddleButton == MouseButtonState.Pressed)
 				Camera.Pan((float)delta.X, (float)delta.Y);
 
