@@ -50,7 +50,7 @@ namespace yaqmv
 		{
 			GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
-			mr?.Render(MainWindow.Get.GetModelState());
+			mr?.Render(MainWindow.Get.GetModelState(delta));
 		}
 		public void OnUnload(object sender, RoutedEventArgs e)
 		{

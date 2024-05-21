@@ -73,7 +73,8 @@
 			<Button x:Name="BStart" Content="⏮"
 				HorizontalAlignment="Left"
 				Margin="10,6,0,6"			
-				VerticalAlignment="Top" FontFamily="Segoe UI Symbol" Width="28" Height="28" FontSize="16" BorderThickness="1,1,1,1"/>
+				VerticalAlignment="Top" FontFamily="Segoe UI Symbol" Width="28" Height="28" FontSize="16" BorderThickness="1,1,1,1"
+				Click="BSkipStart_Click"/>
 			
 			<Slider x:Name="Timeline" 
 				VerticalAlignment="Center" 
@@ -91,11 +92,13 @@
 			<Button x:Name="BPlay" Content="▶"
 				HorizontalAlignment="Left"
 				Margin="0,6,0,6"
-				VerticalAlignment="Top" FontFamily="Segoe UI Symbol" Width="28" Height="28" FontSize="16" BorderThickness="1,1,1,1"/>
+				VerticalAlignment="Top" FontFamily="Segoe UI Symbol" Width="28" Height="28" FontSize="16" BorderThickness="1,1,1,1"
+				Click="BPlayPause_Click"/>
 			<Button x:Name="BEnd" Content="⏭"
 				HorizontalAlignment="Left"
 				Margin="6,6,10,6"
-				VerticalAlignment="Top" FontFamily="Segoe UI Symbol" Width="28" Height="28" FontSize="16" BorderThickness="1,1,1,1"/>
+				VerticalAlignment="Top" FontFamily="Segoe UI Symbol" Width="28" Height="28" FontSize="16" BorderThickness="1,1,1,1"
+				Click="BSkipEnd_Click"/>
 		</WrapPanel>
 	</Grid>
 </Window>

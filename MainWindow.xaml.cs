@@ -15,6 +15,7 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using static yaqmv.ModelAsset;
 using System.Runtime.CompilerServices;
+using System.Windows.Threading;
 
 namespace yaqmv
 {
@@ -26,16 +27,21 @@ namespace yaqmv
 		internal ModelWindow _mw;
 		internal ModelAsset _loadedAsset;
 		internal ModelState _modelstate;
-		private Stopwatch _time;
+		private DispatcherTimer _time;
 
 		public MainWindow()
 		{
 			InitializeComponent();
 			DataContext = this;
 
+			_time = new DispatcherTimer();
+			_time.Interval = TimeSpan.FromSeconds(0.1);
+			_time.Tick += Anim_Tick;
+			_time.Start();
+
 			_mw = (ModelWindow)FindName("ModelWindow");
 			_loadedAsset = new ModelAsset();
-			_time = new Stopwatch();
+			Playing = false;
 		}
 		private void Window_Loaded(object sender, RoutedEventArgs e)
 		{
@@ -43,7 +49,6 @@ namespace yaqmv
 			NotifyPropertyChanged("AnimStatsText");
 			NotifyPropertyChanged("CurrentFrameText");
 		}
-
 
 		internal static MainWindow Get { get { return (MainWindow)Application.Current.MainWindow; } }
 
@@ -55,6 +60,7 @@ namespace yaqmv
 		{
 			_modelstate = new ModelState();
 			_mw.LoadModel(mdl);
+			Playing = false;
 			SelectAnim(0);
 			AnimSelect.ItemsSource = _loadedAsset.AnimNames;
 			AnimSelect.SelectedIndex = 0;
@@ -63,7 +69,7 @@ namespace yaqmv
 			NotifyPropertyChanged("StatsText");
 		}
 
-		internal ModelState GetModelState()
+		internal ModelState GetModelState(TimeSpan delta)
 		{
 			return _modelstate;
 		}
@@ -71,7 +77,6 @@ namespace yaqmv
 		private void SelectAnim(int a)
 		{
 			if (a != _modelstate.Anim)
-				_time.Restart();
 			_modelstate.Anim = a;
 
 			Timeline.Value = _loadedAsset.anims[_modelstate.Anim].first;
@@ -84,12 +89,38 @@ namespace yaqmv
 			get { return _modelstate.Skin; }
 			set { _modelstate.Skin = value; }
 		}
+		void Anim_Tick(object sender, EventArgs e)
+		{
+			if (Timeline.Value == _loadedAsset.anims[_modelstate.Anim].last)
+				Timeline.Value = _loadedAsset.anims[_modelstate.Anim].first;
+			else
+				Timeline.Value += 1;
 
+		}
 
 
 		// =====================
 		// PROPERTIES
 		// =====================
+
+		private bool _playing;
+		public bool Playing
+		{
+			get { return _playing; }
+			set {
+				_playing = value;
+				if (_playing)
+				{
+					BPlay.Content = "⏸";
+					_time.Start();
+				}
+				else
+				{
+					BPlay.Content = "▶";
+					_time.Stop();
+				}
+			}
+		}
 
 		public int TimelineValue { 
 			get { return _modelstate.Frame; } 
@@ -173,7 +204,6 @@ namespace yaqmv
 			openFileDialog.Filter = "Quake model files (*.mdl)|*.mdl|All files (*.*)|*.*";
 			if (openFileDialog.ShowDialog() == true)
 			{
-				_time.Restart();
 				_loadedAsset = new ModelAsset(openFileDialog.FileName);
 
 				Display(_loadedAsset);
@@ -197,6 +227,23 @@ namespace yaqmv
 		private void Timeline_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
 		{
 			//NotifyPropertyChanged("CurrentFrameText");
+		}
+
+		private void BSkipEnd_Click(object sender, RoutedEventArgs e)
+		{
+			Playing = false;
+			Timeline.Value = _loadedAsset.anims[_modelstate.Anim].last;
+		}
+
+		private void BPlayPause_Click(object sender, RoutedEventArgs e)
+		{
+			Playing = !Playing;
+		}
+
+		private void BSkipStart_Click(object sender, RoutedEventArgs e)
+		{
+			Playing = false;
+			Timeline.Value = _loadedAsset.anims[_modelstate.Anim].first;
 		}
 	}
 }
