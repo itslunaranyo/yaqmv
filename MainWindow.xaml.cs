@@ -11,10 +11,7 @@ using System.Windows.Shapes;
 using System.Diagnostics;
 using System.Drawing;
 using Microsoft.Win32;
-using System.Collections.ObjectModel;
 using System.ComponentModel;
-using static yaqmv.ModelAsset;
-using System.Runtime.CompilerServices;
 using System.Windows.Threading;
 
 namespace yaqmv
@@ -89,7 +86,7 @@ namespace yaqmv
 			get { return _modelstate.Skin; }
 			set { _modelstate.Skin = value; }
 		}
-		void Anim_Tick(object sender, EventArgs e)
+		private void Anim_Tick(object sender, EventArgs e)
 		{
 			if (Timeline.Value == _loadedAsset.anims[_modelstate.Anim].last)
 				Timeline.Value = _loadedAsset.anims[_modelstate.Anim].first;
@@ -98,6 +95,14 @@ namespace yaqmv
 
 		}
 
+		private void StepForward()
+		{
+			TimelineValue = ClampToTimeline(_modelstate.Frame + 1);
+		}
+		private void StepBackward()
+		{
+			TimelineValue = ClampToTimeline(_modelstate.Frame - 1);
+		}
 
 		// =====================
 		// PROPERTIES
@@ -132,6 +137,10 @@ namespace yaqmv
 		}
 		public int TimelineMin { get { return _loadedAsset.anims[_modelstate.Anim].first; } }
 		public int TimelineMax { get { return _loadedAsset.anims[_modelstate.Anim].last; } }
+		public int ClampToTimeline(int a)
+		{
+			return Math.Min(TimelineMax, Math.Max(a, TimelineMin));
+		}
 
 		public string StatsText { get { 
 			return "Vertices: " + _loadedAsset.VertexCount.ToString() +
@@ -142,9 +151,9 @@ namespace yaqmv
 		}
 		public string AnimStatsText { get {
 			return "Sequence #: " + _modelstate.Anim.ToString() +
-				"\nFrames: " + (_loadedAsset.anims[_modelstate.Anim].last - _loadedAsset.anims[_modelstate.Anim].first + 1).ToString() +
-				" (" + _loadedAsset.anims[_modelstate.Anim].first.ToString() +
-				"-" + _loadedAsset.anims[_modelstate.Anim].last.ToString() + ")";
+				"\nFrames: " + (TimelineMax - TimelineMin + 1).ToString() +
+				" (" + TimelineMin.ToString() +
+				"-" + TimelineMax.ToString() + ")";
 			}
 		}
 		public string CurrentFrameText { get {
@@ -181,10 +190,8 @@ namespace yaqmv
 		}
 		private void MWOnMouseWheel(object sender, MouseWheelEventArgs e)
 		{
-			int a = _modelstate.Frame;
-			a = (a + ((e.Delta > 0) ? -1 : 1));
-			a = Math.Min(_loadedAsset.anims[_modelstate.Anim].last, Math.Max(a, _loadedAsset.anims[_modelstate.Anim].first));
-			TimelineValue = a;
+			if (e.Delta > 0) StepForward();
+			else StepBackward();
 		}
 		private void MWOnKeyDown(object sender, KeyEventArgs e)
 		{
@@ -195,6 +202,14 @@ namespace yaqmv
 			if (e.Key == Key.K)
 			{
 				_modelstate.Skin = (_modelstate.Skin + 1) % _loadedAsset.SkinCount;
+			}
+			if (e.Key == Key.OemPeriod)
+			{
+				StepForward();
+			}
+			if (e.Key == Key.OemComma)
+			{
+				StepBackward();
 			}
 		}
 
