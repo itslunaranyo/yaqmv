@@ -8,6 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Interop;
 
 namespace yaqmv
 {
@@ -20,8 +21,9 @@ namespace yaqmv
 			{
 				MajorVersion = 3,
 				MinorVersion = 3,
-				GraphicsProfile = ContextProfile.Core
+				Profile = ContextProfile.Core
 			};
+			Focusable = false;
 			Start(settings);
 
 			GL.ClearColor(0.2f, 0.2f, 0.2f, 1.0f);
@@ -29,6 +31,11 @@ namespace yaqmv
 			GL.Enable(EnableCap.DepthTest);
 			GL.Enable(EnableCap.CullFace);
 			GL.CullFace(CullFaceMode.Front);
+		}
+
+		public void ToggleMode()
+		{
+			mr?.ToggleMode();
 		}
 
 		internal void LoadModel(ModelAsset mdl)

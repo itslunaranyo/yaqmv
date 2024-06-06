@@ -24,7 +24,7 @@ namespace yaqmv
 
 		private bool _disposed;
 
-		public Model(int framecount, int[] indices, List<Vector2> uvs, List<Vector3> positions, List<Vector3> normals, Shader shader)
+		public Model(int framecount, int[] indices, List<Vector2> uvs, List<Vector3> positions, List<Vector3> normals)
 		{
 			Count = uvs.Count;
 			int len = uvs.Count * 2 + positions.Count * 3 + normals.Count * 3;

@@ -7,7 +7,11 @@
         xmlns:local="clr-namespace:yaqmv"
         mc:Ignorable="d"
 		Loaded="Window_Loaded"
-        Title="YAQ Model Viewer" Height="720" Width="540">
+ 		Unloaded="Window_Unloaded"
+		KeyDown="OnKeyDown"
+		MouseMove="OnMouseMove"
+		MouseWheel="OnMouseWheel"
+       Title="YAQ Model Viewer" Height="720" Width="540">
 	<Grid Background="#FFDFDFDF">
 		<Grid.RowDefinitions>
 			<RowDefinition Height="Auto" />
@@ -24,12 +28,8 @@
 		</Menu>
 		<local:ModelWindow 
 				x:Name="ModelWindow" 
-				Render="MWOnRender"
-				SizeChanged="MWOnSizeChanged"
-				Unloaded="MWOnUnload"
-				KeyDown="MWOnKeyDown"
-				MouseMove="MWOnMouseMove"
-				MouseWheel="MWOnMouseWheel"
+				Render="OnRender"
+				SizeChanged="OnSizeChanged"
 				Grid.Row="1"
 			/>
 		<Grid Grid.Row="2">

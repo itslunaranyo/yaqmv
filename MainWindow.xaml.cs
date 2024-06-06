@@ -46,12 +46,10 @@ namespace yaqmv
 			NotifyPropertyChanged("AnimStatsText");
 			NotifyPropertyChanged("CurrentFrameText");
 		}
+		private void Window_Unloaded(object sender, RoutedEventArgs e) { _mw.OnUnload(sender, e); }
 
-		internal static MainWindow Get { get { return (MainWindow)Application.Current.MainWindow; } }
-
-		private void MWOnSizeChanged(object sender, SizeChangedEventArgs e) { _mw.OnSizeChanged(sender, e); }
-		private void MWOnRender(TimeSpan delta) { _mw.OnRender(delta); }
-		private void MWOnUnload(object sender, RoutedEventArgs e) { _mw.OnUnload(sender, e); }
+		private void OnSizeChanged(object sender, SizeChangedEventArgs e) { _mw.OnSizeChanged(sender, e); }
+		private void OnRender(TimeSpan delta) { _mw.OnRender(delta); }
 
 		internal void Display(ModelAsset mdl)
 		{
@@ -107,6 +105,7 @@ namespace yaqmv
 		// =====================
 		// PROPERTIES
 		// =====================
+		internal static MainWindow Get { get { return (MainWindow)Application.Current.MainWindow; } }
 
 		private bool _playing;
 		public bool Playing
@@ -174,7 +173,7 @@ namespace yaqmv
 		// =====================
 
 		static System.Windows.Point _mousepos;
-		private void MWOnMouseMove(object sender, System.Windows.Input.MouseEventArgs e)
+		private void OnMouseMove(object sender, System.Windows.Input.MouseEventArgs e)
 		{
 			var newpos = e.GetPosition(this);
 			var delta = newpos - _mousepos;
@@ -188,12 +187,12 @@ namespace yaqmv
 
 			_mousepos = newpos;
 		}
-		private void MWOnMouseWheel(object sender, MouseWheelEventArgs e)
+		private void OnMouseWheel(object sender, MouseWheelEventArgs e)
 		{
 			if (e.Delta > 0) StepForward();
 			else StepBackward();
 		}
-		private void MWOnKeyDown(object sender, KeyEventArgs e)
+		private void OnKeyDown(object sender, KeyEventArgs e)
 		{
 			if (e.Key == Key.F)
 			{
@@ -211,6 +210,11 @@ namespace yaqmv
 			{
 				StepBackward();
 			}
+			if (e.Key == Key.M)
+			{
+				_mw.ToggleMode();
+			}
+			e.Handled = true;
 		}
 
 		private void MenuFileOpen(object sender, RoutedEventArgs e)

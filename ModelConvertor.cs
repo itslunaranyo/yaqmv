@@ -11,7 +11,7 @@ namespace yaqmv
 {
 	internal static partial class ModelConvertor
 	{
-		public static Model Convert(ModelAsset asset, Shader shader)
+		public static Model Convert(ModelAsset asset)
 		{
 			var backfacemap = new Dictionary<int, int>();   // remember what vertex index corresponds to what offseam UV index
 			var UVList = new List<Vector2>();  // flat list of UV coordinates
@@ -77,7 +77,7 @@ namespace yaqmv
 				normals.AddRange(normlist);
 			}
 
-			return new Model(asset.FrameCount, indices, UVList, positions, normals, shader);
+			return new Model(asset.FrameCount, indices, UVList, positions, normals);
 		}
 	}
 }
