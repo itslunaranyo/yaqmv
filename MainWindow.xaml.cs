@@ -186,6 +186,7 @@ namespace yaqmv
 				Camera.Pan((float)delta.X, (float)delta.Y);
 
 			_mousepos = newpos;
+			e.Handled = true;
 		}
 		private void OnMouseWheel(object sender, MouseWheelEventArgs e)
 		{

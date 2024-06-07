@@ -85,17 +85,25 @@
 				</WrapPanel>
 			</StackPanel>
 		</Grid>
-		<WrapPanel	Grid.Row="3" HorizontalAlignment="Left" VerticalAlignment="Top">
+		<Grid Grid.Row="3">
+			<Grid.ColumnDefinitions>
+				<ColumnDefinition Width="48"/>
+				<ColumnDefinition Width="*"/>
+				<ColumnDefinition Width="72"/>
+			</Grid.ColumnDefinitions>
+			<Grid.RowDefinitions>
+				<RowDefinition Height="*" />
+			</Grid.RowDefinitions>
+			<WrapPanel>
 			<Button x:Name="BStart" Content="⏮"
 				HorizontalAlignment="Left"
 				Margin="10,6,0,6"			
 				VerticalAlignment="Top" FontFamily="Segoe UI Symbol" Width="28" Height="28" FontSize="16" BorderThickness="1,1,1,1"
 				Click="BSkipStart_Click"/>
-			
-			<Slider x:Name="Timeline" 
+			</WrapPanel>
+			<Slider  Grid.Column="1" x:Name="Timeline" 
 				VerticalAlignment="Center" 
-				HorizontalAlignment="Left" 
-				Width="400" 
+				HorizontalAlignment="Stretch" 
 				IsSnapToTickEnabled="True"
 				Margin="6,6,6,6"
 				TickPlacement="BottomRight"
@@ -104,7 +112,8 @@
 				Maximum="{Binding TimelineMax}"
 				ValueChanged="Timeline_ValueChanged"
 				/>
-			
+			<WrapPanel Grid.Column="2">
+		
 			<Button x:Name="BPlay" Content="▶"
 				HorizontalAlignment="Left"
 				Margin="0,6,0,6"
@@ -115,6 +124,7 @@
 				Margin="6,6,10,6"
 				VerticalAlignment="Top" FontFamily="Segoe UI Symbol" Width="28" Height="28" FontSize="16" BorderThickness="1,1,1,1"
 				Click="BSkipEnd_Click"/>
-		</WrapPanel>
+			</WrapPanel>
+		</Grid>
 	</Grid>
 </Window>
