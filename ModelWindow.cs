@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Interop;
 using System.Security.Cryptography;
+using System.Windows.Input;
 
 namespace yaqmv
 {
@@ -63,6 +64,24 @@ namespace yaqmv
 		public void OnUnload(object sender, RoutedEventArgs e)
 		{
 			mr.Dispose();
+		}
+
+
+		static System.Windows.Point _mousepos;
+		private void OnMouseMove(object sender, System.Windows.Input.MouseEventArgs e)
+		{
+			var newpos = e.GetPosition(this);
+			var delta = newpos - _mousepos;
+
+			if (Mouse.LeftButton == MouseButtonState.Pressed)
+				Camera.Orbit((float)delta.X, (float)delta.Y);
+			else if (Mouse.RightButton == MouseButtonState.Pressed)
+				Camera.Dolly(-(float)delta.Y);
+			else if (Mouse.MiddleButton == MouseButtonState.Pressed)
+				Camera.Pan((float)delta.X, (float)delta.Y);
+
+			_mousepos = newpos;
+			e.Handled = true;
 		}
 	}
 }
