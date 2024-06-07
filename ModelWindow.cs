@@ -34,6 +34,8 @@ namespace yaqmv
 			GL.Enable(EnableCap.DepthTest);
 			GL.Enable(EnableCap.CullFace);
 			GL.CullFace(CullFaceMode.Front);
+
+			MouseMove += new MouseEventHandler(OnMouseMove);
 		}
 
 		public void SetMode(int mode)

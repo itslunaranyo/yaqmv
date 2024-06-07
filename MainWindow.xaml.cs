@@ -172,15 +172,13 @@ namespace yaqmv
 		// INPUT
 		// =====================
 
-
-		static System.Windows.Point _mousepos;
 		private void OnMouseMove(object sender, System.Windows.Input.MouseEventArgs e)
 		{
 			// fixme: why doesn't the XAML parser want to just bind the handler on the modelwindow?
-			if (e.Source == _mw)
-			{
-				_mw.OnMouseMove(sender, e);
-			}
+			//if (e.Source == _mw)
+			//{
+			//	_mw.OnMouseMove(sender, e);
+			//}
 		}
 		private void OnMouseWheel(object sender, MouseWheelEventArgs e)
 		{

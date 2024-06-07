@@ -19,7 +19,7 @@ namespace yaqmv
 		private Shader ShWhiteShaded;
 		private Texture[] Skins;
 		private Model? CurrentModel;
-		private ModelAsset CurrentAsset;
+		private ModelAsset? CurrentAsset;
 		private float Width, Height;
 		private bool _disposed;
 		private enum RenderMode { Textured, TexturedWire, Shaded, ShadedWire, Wire };

@@ -9,7 +9,6 @@
 		Loaded="Window_Loaded"
  		Unloaded="Window_Unloaded"
 		KeyDown="OnKeyDown"
-		MouseMove="OnMouseMove"
 		MouseWheel="OnMouseWheel"
        Title="YAQ Model Viewer" Height="720" Width="540">
 	<Grid Background="#FFDFDFDF">
