@@ -18,31 +18,35 @@ namespace yaqmv
 		private Shader ShFlat;
 		private Shader ShWhiteShaded;
 		private Texture[] Skins;
-		private Model CurrentModel;
+		private Model? CurrentModel;
 		private ModelAsset CurrentAsset;
 		private float Width, Height;
 		private bool _disposed;
 		private enum RenderMode { Wire, Shaded, Textured, ShadedWire, TexturedWire };
 		private RenderMode _rmode;
 
-		internal ModelRenderer(ModelAsset mdl)
+		internal ModelRenderer()
 		{
 			_disposed = false;
 			ShTexturedShaded = new Shader("shaders/default_v.shader", "shaders/default_f.shader");
 			ShFlat = new Shader("shaders/default_v.shader", "shaders/flat_f.shader");
 			ShWhiteShaded = new Shader("shaders/default_v.shader", "shaders/shaded_f.shader");
 
+			Skins = new Texture[0];
+
+			_rmode = RenderMode.Textured;
+			GL.DepthFunc(DepthFunction.Lequal);
+		}
+		internal void DisplayModel(ModelAsset mdl)
+		{
 			CurrentAsset = mdl;
 			CurrentModel?.Dispose();
 			CurrentModel = ModelConvertor.Convert(mdl);
 			Skins = new Texture[mdl.SkinCount];
-			for(int i = 0; i < mdl.SkinCount; i++)
+			for (int i = 0; i < mdl.SkinCount; i++)
 			{
 				Skins[i] = new Texture(mdl.SkinWidth, mdl.SkinHeight, mdl.skins[i].pixels);
 			}
-
-			_rmode = RenderMode.Wire;
-			GL.DepthFunc(DepthFunction.Lequal);
 		}
 		internal void Resize(int w, int h)
 		{
@@ -66,6 +70,9 @@ namespace yaqmv
 
 		internal void Render(ModelState ms)
 		{
+			if (CurrentModel == null)
+				return;
+
 			float asp = Width / Height;
 			float vfov = MathHelper.DegreesToRadians(60f);
 

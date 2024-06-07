@@ -9,12 +9,13 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Interop;
+using System.Security.Cryptography;
 
 namespace yaqmv
 {
 	public partial class ModelWindow : GLWpfControl
 	{
-		private ModelRenderer? mr;
+		private ModelRenderer mr;
 		public ModelWindow()
 		{
 			var settings = new GLWpfControlSettings
@@ -25,6 +26,7 @@ namespace yaqmv
 			};
 			Focusable = false;
 			Start(settings);
+			mr = new ModelRenderer();
 
 			GL.ClearColor(0.2f, 0.2f, 0.2f, 1.0f);
 			GL.Viewport(0, 0, (int)ActualWidth, (int)ActualHeight);
@@ -40,9 +42,8 @@ namespace yaqmv
 
 		internal void LoadModel(ModelAsset mdl)
 		{
-			mr?.Dispose();
-			mr = new ModelRenderer(mdl);
-			mr?.Resize((int)ActualWidth, (int)ActualHeight);
+			mr.DisplayModel(mdl);
+			mr.Resize((int)ActualWidth, (int)ActualHeight);
 			Camera.Reset(mdl.CenterOfFrame(0), mdl.RadiusOfFrame(0));
 		}
 
