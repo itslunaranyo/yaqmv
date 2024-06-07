@@ -35,9 +35,9 @@ namespace yaqmv
 			GL.CullFace(CullFaceMode.Front);
 		}
 
-		public void ToggleMode()
+		public void SetMode(int mode)
 		{
-			mr?.ToggleMode();
+			mr.SetMode(mode);
 		}
 
 		internal void LoadModel(ModelAsset mdl)
@@ -49,7 +49,7 @@ namespace yaqmv
 
 		public void OnSizeChanged(object sender, SizeChangedEventArgs e)
 		{
-			mr?.Resize((int)ActualWidth, (int)ActualHeight);
+			mr.Resize((int)ActualWidth, (int)ActualHeight);
 			GL.Viewport(0, 0, (int)ActualWidth, (int)ActualHeight);
 			GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 		}
@@ -58,11 +58,11 @@ namespace yaqmv
 		{
 			GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
-			mr?.Render(MainWindow.Get.GetModelState(delta));
+			mr.Render(MainWindow.Get.GetModelState(delta));
 		}
 		public void OnUnload(object sender, RoutedEventArgs e)
 		{
-			mr?.Dispose();
+			mr.Dispose();
 		}
 	}
 }

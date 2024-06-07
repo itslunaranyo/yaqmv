@@ -210,10 +210,6 @@ namespace yaqmv
 			{
 				StepBackward();
 			}
-			if (e.Key == Key.M)
-			{
-				_mw.ToggleMode();
-			}
 			e.Handled = true;
 		}
 
@@ -263,6 +259,11 @@ namespace yaqmv
 		{
 			Playing = false;
 			Timeline.Value = _loadedAsset.anims[_modelstate.Anim].first;
+		}
+
+		private void ModeSelect_SelectionChanged(object sender, SelectionChangedEventArgs e)
+		{
+			_mw?.SetMode(ModeSelect.SelectedIndex);
 		}
 	}
 }

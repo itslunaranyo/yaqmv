@@ -22,7 +22,7 @@ namespace yaqmv
 		private ModelAsset CurrentAsset;
 		private float Width, Height;
 		private bool _disposed;
-		private enum RenderMode { Wire, Shaded, Textured, ShadedWire, TexturedWire };
+		private enum RenderMode { Textured, TexturedWire, Shaded, ShadedWire, Wire };
 		private RenderMode _rmode;
 
 		internal ModelRenderer()
@@ -54,18 +54,9 @@ namespace yaqmv
 			Height = h;
 		}
 
-		public void ToggleMode()
+		public void SetMode(int mode)
 		{
-			if (_rmode == RenderMode.Textured)
-				_rmode = RenderMode.TexturedWire;
-			else if (_rmode == RenderMode.TexturedWire)
-				_rmode = RenderMode.Shaded;
-			else if (_rmode == RenderMode.Shaded)
-				_rmode = RenderMode.ShadedWire;
-			else if (_rmode == RenderMode.ShadedWire)
-				_rmode = RenderMode.Wire;
-			else if (_rmode == RenderMode.Wire)
-				_rmode = RenderMode.Textured;
+			_rmode = (RenderMode)mode;
 		}
 
 		internal void Render(ModelState ms)
