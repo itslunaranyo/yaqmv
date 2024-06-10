@@ -1,7 +1,7 @@
 ﻿using OpenTK.Mathematics;
 using OpenTK.Graphics.OpenGL;
 using OpenTK.Wpf;
-using OpenTK.Windowing.Common;
+//using OpenTK.Windowing.Common;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -23,7 +23,7 @@ namespace yaqmv
 			{
 				MajorVersion = 3,
 				MinorVersion = 3,
-				Profile = ContextProfile.Core
+				Profile = OpenTK.Windowing.Common.ContextProfile.Core
 			};
 			Focusable = false;
 			Start(settings);
@@ -36,6 +36,7 @@ namespace yaqmv
 			GL.CullFace(CullFaceMode.Front);
 
 			MouseMove += new MouseEventHandler(OnMouseMove);
+			MouseDown += new MouseButtonEventHandler(OnMouseDown);
 		}
 
 		public void SetMode(int mode)
@@ -68,19 +69,38 @@ namespace yaqmv
 			mr.Dispose();
 		}
 
+		private System.Windows.Point _mousepos;
+		private bool ButtonDownLeft;
+		private bool ButtonDownRight;
+		private bool ButtonDownMiddle;
 
-		static System.Windows.Point _mousepos;
+		private void OnMouseDown(object sender, MouseButtonEventArgs e)
+		{
+			if (e.ButtonState == MouseButtonState.Pressed)
+			{
+				if (e.ChangedButton == MouseButton.Left)   ButtonDownLeft = true;
+				if (e.ChangedButton == MouseButton.Right)  ButtonDownRight = true;
+				if (e.ChangedButton == MouseButton.Middle) ButtonDownMiddle = true;
+			}
+		}
 		private void OnMouseMove(object sender, System.Windows.Input.MouseEventArgs e)
 		{
 			var newpos = e.GetPosition(this);
 			var delta = newpos - _mousepos;
 
-			if (Mouse.LeftButton == MouseButtonState.Pressed)
+			if (ButtonDownLeft)
 				Camera.Orbit((float)delta.X, (float)delta.Y);
-			else if (Mouse.RightButton == MouseButtonState.Pressed)
+			else if (ButtonDownRight)
 				Camera.Dolly(-(float)delta.Y);
-			else if (Mouse.MiddleButton == MouseButtonState.Pressed)
+			else if (ButtonDownMiddle)
 				Camera.Pan((float)delta.X, (float)delta.Y);
+
+			if (Mouse.LeftButton != MouseButtonState.Pressed)
+				ButtonDownLeft = false;
+			else if (Mouse.RightButton != MouseButtonState.Pressed)
+				ButtonDownRight = false;
+			else if (Mouse.MiddleButton != MouseButtonState.Pressed)
+				ButtonDownMiddle = false;
 
 			_mousepos = newpos;
 			e.Handled = true;
