@@ -97,9 +97,9 @@ namespace yaqmv
 
 			if (Mouse.LeftButton != MouseButtonState.Pressed)
 				ButtonDownLeft = false;
-			else if (Mouse.RightButton != MouseButtonState.Pressed)
+			if (Mouse.RightButton != MouseButtonState.Pressed)
 				ButtonDownRight = false;
-			else if (Mouse.MiddleButton != MouseButtonState.Pressed)
+			if (Mouse.MiddleButton != MouseButtonState.Pressed)
 				ButtonDownMiddle = false;
 
 			_mousepos = newpos;
