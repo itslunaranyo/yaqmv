@@ -16,7 +16,7 @@
 			<RowDefinition Height="Auto" />
 			<RowDefinition Height="*" />
 			<RowDefinition Height="120" />
-			<RowDefinition Height="40" />
+			<RowDefinition Height="44" />
 		</Grid.RowDefinitions>
 		<Menu VerticalAlignment="Top">
 			<MenuItem Header="_File">
@@ -69,7 +69,7 @@
 						<ComboBoxItem Content="Shaded Wire"/>
 						<ComboBoxItem Content="Wireframe"/>
 					</ComboBox>
-				</WrapPanel>			
+				</WrapPanel>
 			</StackPanel>
 			<StackPanel Margin="8" Grid.Column="3">
 				<WrapPanel>
@@ -86,7 +86,7 @@
 		</Grid>
 		<Grid Grid.Row="3">
 			<Grid.ColumnDefinitions>
-				<ColumnDefinition Width="48"/>
+				<ColumnDefinition Width="38"/>
 				<ColumnDefinition Width="*"/>
 				<ColumnDefinition Width="72"/>
 			</Grid.ColumnDefinitions>
@@ -94,31 +94,32 @@
 				<RowDefinition Height="*" />
 			</Grid.RowDefinitions>
 			<WrapPanel>
-			<Button x:Name="BStart" Content="⏮"
+				<Button x:Name="BStart" Content="⏮"
 				HorizontalAlignment="Left"
 				Margin="10,6,0,6"			
-				VerticalAlignment="Top" FontFamily="Segoe UI Symbol" Width="28" Height="28" FontSize="16" BorderThickness="1,1,1,1"
+				VerticalAlignment="Top" FontFamily="Segoe UI Symbol"
+				Width="28" Height="28"
+				FontSize="16" BorderThickness="1,1,1,1"
 				Click="BSkipStart_Click"/>
 			</WrapPanel>
-			<Slider  Grid.Column="1" x:Name="Timeline" 
-				VerticalAlignment="Center" 
-				HorizontalAlignment="Stretch" 
-				IsSnapToTickEnabled="True"
+			<local:Timeline Grid.Column="1" x:Name="Timeline" 
+				VerticalAlignment="Top" 
+				HorizontalAlignment="Stretch"
 				Margin="6,6,6,6"
-				TickPlacement="BottomRight"
 				Value="{Binding TimelineValue, Mode=TwoWay}"
 				Minimum="{Binding TimelineMin}"
 				Maximum="{Binding TimelineMax}"
 				ValueChanged="Timeline_ValueChanged"
+				Height="28"
 				/>
 			<WrapPanel Grid.Column="2">
-		
-			<Button x:Name="BPlay" Content="▶"
+
+				<Button x:Name="BPlay" Content="▶"
 				HorizontalAlignment="Left"
 				Margin="0,6,0,6"
 				VerticalAlignment="Top" FontFamily="Segoe UI Symbol" Width="28" Height="28" FontSize="16" BorderThickness="1,1,1,1"
 				Click="BPlayPause_Click"/>
-			<Button x:Name="BEnd" Content="⏭"
+				<Button x:Name="BEnd" Content="⏭"
 				HorizontalAlignment="Left"
 				Margin="6,6,10,6"
 				VerticalAlignment="Top" FontFamily="Segoe UI Symbol" Width="28" Height="28" FontSize="16" BorderThickness="1,1,1,1"
