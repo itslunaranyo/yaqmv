@@ -52,17 +52,17 @@ namespace yaqmv
         {
             DefaultStyleKeyProperty.OverrideMetadata(typeof(Timeline), new FrameworkPropertyMetadata(typeof(Timeline)));
 
-			FrameworkPropertyMetadata vpm = new FrameworkPropertyMetadata();
-			vpm.AffectsRender = true;
-			ValueProperty.OverrideMetadata(typeof(Timeline), vpm);
+			FrameworkPropertyMetadata valuePropertyMeta = new FrameworkPropertyMetadata();
+			valuePropertyMeta.AffectsRender = true;
+			ValueProperty.OverrideMetadata(typeof(Timeline), valuePropertyMeta);
 
-			vpm = new FrameworkPropertyMetadata();
-			vpm.AffectsRender = true; 
-			MinimumProperty.OverrideMetadata(typeof(Timeline), vpm);
+			valuePropertyMeta = new FrameworkPropertyMetadata();
+			valuePropertyMeta.AffectsRender = true; 
+			MinimumProperty.OverrideMetadata(typeof(Timeline), valuePropertyMeta);
 
-			vpm = new FrameworkPropertyMetadata();
-			vpm.AffectsRender = true; 
-			MaximumProperty.OverrideMetadata(typeof(Timeline), vpm);
+			valuePropertyMeta = new FrameworkPropertyMetadata();
+			valuePropertyMeta.AffectsRender = true; 
+			MaximumProperty.OverrideMetadata(typeof(Timeline), valuePropertyMeta);
 		}
 
 		private void HandleHit(double px)

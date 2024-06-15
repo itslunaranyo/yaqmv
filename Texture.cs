@@ -21,13 +21,13 @@ namespace yaqmv
 				Debug.WriteLine(e);
 		}
 
-		int Handle { get; }
+		private int _handle { get; }
 
 		public Texture(int w, int h, byte[] pixeldata)
 		{
-			Handle = GL.GenTexture();
+			_handle = GL.GenTexture();
 
-			GL.BindTexture(TextureTarget.Texture2D, Handle);
+			GL.BindTexture(TextureTarget.Texture2D, _handle);
 			GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Nearest);
 			GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Nearest); 
 			GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, w, h, 0, PixelFormat.Rgba, PixelType.UnsignedByte, pixeldata);
@@ -36,7 +36,7 @@ namespace yaqmv
 		public void Bind(TextureUnit unit = TextureUnit.Texture0)
 		{
 			GL.ActiveTexture(unit);
-			GL.BindTexture(TextureTarget.Texture2D, Handle);
+			GL.BindTexture(TextureTarget.Texture2D, _handle);
 			//GLWhatsWrong();
 		}
 	}

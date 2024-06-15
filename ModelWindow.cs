@@ -16,7 +16,7 @@ namespace yaqmv
 {
 	public partial class ModelWindow : GLWpfControl
 	{
-		private ModelRenderer mr;
+		private ModelRenderer _modelRenderer;
 		public ModelWindow()
 		{
 			var settings = new GLWpfControlSettings
@@ -27,7 +27,7 @@ namespace yaqmv
 			};
 			Focusable = false;
 			Start(settings);
-			mr = new ModelRenderer();
+			_modelRenderer = new ModelRenderer();
 
 			GL.ClearColor(0.2f, 0.2f, 0.2f, 1.0f);
 			GL.Viewport(0, 0, (int)ActualWidth, (int)ActualHeight);
@@ -41,19 +41,19 @@ namespace yaqmv
 
 		public void SetMode(int mode)
 		{
-			mr.SetMode(mode);
+			_modelRenderer.SetMode(mode);
 		}
 
 		internal void LoadModel(ModelAsset mdl)
 		{
-			mr.DisplayModel(mdl);
-			mr.Resize((int)ActualWidth, (int)ActualHeight);
+			_modelRenderer.DisplayModel(mdl);
+			_modelRenderer.Resize((int)ActualWidth, (int)ActualHeight);
 			Camera.Reset(mdl.CenterOfFrame(0), mdl.RadiusOfFrame(0));
 		}
 
 		public void OnSizeChanged(object sender, SizeChangedEventArgs e)
 		{
-			mr.Resize((int)ActualWidth, (int)ActualHeight);
+			_modelRenderer.Resize((int)ActualWidth, (int)ActualHeight);
 			GL.Viewport(0, 0, (int)ActualWidth, (int)ActualHeight);
 			GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 		}
@@ -62,47 +62,47 @@ namespace yaqmv
 		{
 			GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
-			mr.Render(MainWindow.Get.GetModelState(delta));
+			_modelRenderer.Render(MainWindow.Get.GetModelState(delta));
 		}
 		public void OnUnload(object sender, RoutedEventArgs e)
 		{
-			mr.Dispose();
+			_modelRenderer.Dispose();
 		}
 
-		private System.Windows.Point _mousepos;
-		private bool ButtonDownLeft;
-		private bool ButtonDownRight;
-		private bool ButtonDownMiddle;
+		private System.Windows.Point _mousePos;
+		private bool _buttonDownLeft;
+		private bool _buttonDownRight;
+		private bool _buttonDownMiddle;
 
 		private void OnMouseDown(object sender, MouseButtonEventArgs e)
 		{
 			if (e.ButtonState == MouseButtonState.Pressed)
 			{
-				if (e.ChangedButton == MouseButton.Left)   ButtonDownLeft = true;
-				if (e.ChangedButton == MouseButton.Right)  ButtonDownRight = true;
-				if (e.ChangedButton == MouseButton.Middle) ButtonDownMiddle = true;
+				if (e.ChangedButton == MouseButton.Left)   _buttonDownLeft = true;
+				if (e.ChangedButton == MouseButton.Right)  _buttonDownRight = true;
+				if (e.ChangedButton == MouseButton.Middle) _buttonDownMiddle = true;
 			}
 		}
 		private void OnMouseMove(object sender, System.Windows.Input.MouseEventArgs e)
 		{
-			var newpos = e.GetPosition(this);
-			var delta = newpos - _mousepos;
+			var newPos = e.GetPosition(this);
+			var delta = newPos - _mousePos;
 
-			if (ButtonDownLeft)
+			if (_buttonDownLeft)
 				Camera.Orbit((float)delta.X, (float)delta.Y);
-			else if (ButtonDownRight)
+			else if (_buttonDownRight)
 				Camera.Dolly(-(float)delta.Y);
-			else if (ButtonDownMiddle)
+			else if (_buttonDownMiddle)
 				Camera.Pan((float)delta.X, (float)delta.Y);
 
 			if (Mouse.LeftButton != MouseButtonState.Pressed)
-				ButtonDownLeft = false;
+				_buttonDownLeft = false;
 			if (Mouse.RightButton != MouseButtonState.Pressed)
-				ButtonDownRight = false;
+				_buttonDownRight = false;
 			if (Mouse.MiddleButton != MouseButtonState.Pressed)
-				ButtonDownMiddle = false;
+				_buttonDownMiddle = false;
 
-			_mousepos = newpos;
+			_mousePos = newPos;
 			e.Handled = true;
 		}
 	}

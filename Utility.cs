@@ -12,8 +12,8 @@ namespace yaqmv
 	{
 		public static string ReadResourceText(string path)
 		{
-			StreamResourceInfo srinfo = YAQMVApp.GetResourceStream(new Uri(path, UriKind.Relative));
-			StreamReader sr = new StreamReader(srinfo.Stream);
+			StreamResourceInfo srInfo = YAQMVApp.GetResourceStream(new Uri(path, UriKind.Relative));
+			StreamReader sr = new StreamReader(srInfo.Stream);
 			string read = sr.ReadToEnd();
 			return read;
 		}

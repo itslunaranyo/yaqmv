@@ -12,21 +12,21 @@ namespace yaqmv
 {
 	internal class Model : IDisposable
 	{
-		private int VertexBufferObject;
-		private int VertexArrayObject;
-		private int ElementBufferObject;
-		private int Count;
+		private int _vertexBufferObject;
+		private int _vertexArrayObject;
+		private int _elementBufferObject;
+		private int _count;
 		public int Elements;
 
-		private readonly int attrib_pos = 0;
-		private readonly int attrib_norm = 1;
-		private readonly int attrib_uv = 2;
+		private readonly int _attribPos = 0;
+		private readonly int _attribNorm = 1;
+		private readonly int _attribUV = 2;
 
 		private bool _disposed;
 
 		public Model(int framecount, int[] indices, List<Vector2> uvs, List<Vector3> positions, List<Vector3> normals)
 		{
-			Count = uvs.Count;
+			_count = uvs.Count;
 			int len = uvs.Count * 2 + positions.Count * 3 + normals.Count * 3;
 			float[] vbof = new float[len];
 			int i = 0;
@@ -48,26 +48,26 @@ namespace yaqmv
 			}
 
 			Elements = indices.Length;
-			VertexBufferObject = GL.GenBuffer();
-			ElementBufferObject = GL.GenBuffer();
-			VertexArrayObject = GL.GenVertexArray();
+			_vertexBufferObject = GL.GenBuffer();
+			_elementBufferObject = GL.GenBuffer();
+			_vertexArrayObject = GL.GenVertexArray();
 
-			GL.BindVertexArray(VertexArrayObject);
-			GL.BindBuffer(BufferTarget.ArrayBuffer, VertexBufferObject);
-			GL.BindBuffer(BufferTarget.ElementArrayBuffer, ElementBufferObject);
+			GL.BindVertexArray(_vertexArrayObject);
+			GL.BindBuffer(BufferTarget.ArrayBuffer, _vertexBufferObject);
+			GL.BindBuffer(BufferTarget.ElementArrayBuffer, _elementBufferObject);
 			GL.BufferData(BufferTarget.ArrayBuffer, vbof.Length * sizeof(float), vbof, BufferUsageHint.StaticDraw);
 			GL.BufferData(BufferTarget.ElementArrayBuffer, indices.Length * sizeof(uint), indices, BufferUsageHint.StaticDraw);
 
 		}
 		public void Bind(int pose)
 		{
-			GL.BindVertexArray(VertexArrayObject);
-			GL.VertexAttribPointer(attrib_uv, 2, VertexAttribPointerType.Float, false, 2 * sizeof(float), 0);
-			GL.EnableVertexAttribArray(attrib_uv);
-			GL.VertexAttribPointer(attrib_pos, 3, VertexAttribPointerType.Float, false, 6 * sizeof(float), (Count * 2 + Count * pose * 6) * sizeof(float));
-			GL.EnableVertexAttribArray(attrib_pos);
-			GL.VertexAttribPointer(attrib_norm, 3, VertexAttribPointerType.Float, false, 6 * sizeof(float), (Count * 2 + Count * pose * 6 + 3) * sizeof(float));
-			GL.EnableVertexAttribArray(attrib_norm);
+			GL.BindVertexArray(_vertexArrayObject);
+			GL.VertexAttribPointer(_attribUV, 2, VertexAttribPointerType.Float, false, 2 * sizeof(float), 0);
+			GL.EnableVertexAttribArray(_attribUV);
+			GL.VertexAttribPointer(_attribPos, 3, VertexAttribPointerType.Float, false, 6 * sizeof(float), (_count * 2 + _count * pose * 6) * sizeof(float));
+			GL.EnableVertexAttribArray(_attribPos);
+			GL.VertexAttribPointer(_attribNorm, 3, VertexAttribPointerType.Float, false, 6 * sizeof(float), (_count * 2 + _count * pose * 6 + 3) * sizeof(float));
+			GL.EnableVertexAttribArray(_attribNorm);
 		}
 		~Model()
 		{
@@ -79,9 +79,9 @@ namespace yaqmv
 		public void Dispose()
 		{
 			if (_disposed) return;
-			GL.DeleteBuffers(1, ref VertexBufferObject);
-			GL.DeleteBuffers(1, ref ElementBufferObject);
-			GL.DeleteVertexArrays(1, ref VertexArrayObject);
+			GL.DeleteBuffers(1, ref _vertexBufferObject);
+			GL.DeleteBuffers(1, ref _elementBufferObject);
+			GL.DeleteVertexArrays(1, ref _vertexArrayObject);
 			_disposed = true;
 		}
 	}
