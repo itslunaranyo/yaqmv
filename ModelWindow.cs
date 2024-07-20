@@ -58,11 +58,11 @@ namespace yaqmv
 			GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 		}
 
-		public void OnRender(TimeSpan delta)
+		public void OnRender(TimeSpan delta, ModelState _ms)
 		{
 			GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
-			_modelRenderer.Render(MainWindow.Get.GetModelState(delta));
+			_modelRenderer.Render(_ms);
 		}
 		public void OnUnload(object sender, RoutedEventArgs e)
 		{

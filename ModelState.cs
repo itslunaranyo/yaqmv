@@ -6,15 +6,17 @@ using System.Threading.Tasks;
 
 namespace yaqmv
 {
-    internal struct ModelState
+	public struct ModelState
     {
 		internal int Skin;
+		internal int Skinframe;
 		internal int Frame;
 		internal int Anim;
 		internal float FrameLerp;
 		public ModelState()
 		{
 			Skin = 0;
+			Skinframe = 0;
 			Anim = 0;
 			Frame = 0;
 			FrameLerp = 0f;

@@ -49,7 +49,35 @@ namespace yaqmv
 		private void Window_Unloaded(object sender, RoutedEventArgs e) { _modelWindow.OnUnload(sender, e); }
 
 		private void OnSizeChanged(object sender, SizeChangedEventArgs e) { _modelWindow.OnSizeChanged(sender, e); }
-		private void OnRender(TimeSpan delta) { _modelWindow.OnRender(delta); }
+
+		static double skinTime = 0;
+		private void OnRender(TimeSpan delta)
+		{
+			// TODO: this won't work on skingroups past the first one
+			if (_loadedAsset.skins.Length > 0)
+			{
+				int i;
+				int skinLength = _loadedAsset.skins[_modelState.Skin].images.Length;
+				if (skinLength > 1)
+				{
+					_modelState.Skinframe = 0;
+					for (i = 0; i < skinLength; i++)
+					{
+						if (_loadedAsset.skins[_modelState.Skin].durations[i] > skinTime)
+							break;
+					}
+					if (i == skinLength)
+					{
+						skinTime -= _loadedAsset.skins[_modelState.Skin].durations[i-1];
+						i = 0;
+					}
+
+					skinTime += delta.TotalSeconds;
+					_modelState.Skinframe = i;
+				}
+			}
+			_modelWindow.OnRender(delta, _modelState);
+		}
 
 		internal void Display(ModelAsset mdl)
 		{
@@ -62,11 +90,6 @@ namespace yaqmv
 			SkinSelect.ItemsSource = _loadedAsset.SkinNames;
 			SkinSelect.SelectedIndex = 0;
 			NotifyPropertyChanged("StatsText");
-		}
-
-		internal ModelState GetModelState(TimeSpan delta)
-		{
-			return _modelState;
 		}
 
 		private void SelectAnim(int a)

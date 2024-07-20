@@ -19,8 +19,8 @@ namespace yaqmv
 		internal Triangle[] tris;
 		internal Frame[] frames;
 		internal Anim[] anims;
-		internal ObservableCollection<string> AnimNames = new ObservableCollection<string>();
-		internal ObservableCollection<string> SkinNames = new ObservableCollection<string>();
+		internal ObservableCollection<string> AnimNames = [];
+		internal ObservableCollection<string> SkinNames = [];
 
 		internal int SkinCount { get { return header.skincount; } }
 		internal int SkinWidth { get { return header.skinwidth; } }
@@ -35,9 +35,9 @@ namespace yaqmv
 		public ModelAsset()
 		{
 			header = new Header();
-			skins = Array.Empty<Skin>();
-			verts = Array.Empty<Vertex>();
-			tris = Array.Empty<Triangle>();
+			skins = [];
+			verts = [];
+			tris = [];
 			frames = [new Frame()];
 			anims = [new Anim()];
 			TotalFrameCount = 0;
@@ -51,20 +51,29 @@ namespace yaqmv
 			using (var mdlfile = new BinaryReader(File.OpenRead(mdlpath), Encoding.ASCII))
 			{
 				float group;
-				int i;
+				int i, s;
 
 				header = new Header(mdlfile);
 
-				// TODO test Enumerable.Repeat for stability on these
 				skins = new Skin[header.skincount];
 				for (i = 0; i < header.skincount; i++)
 				{
 					group = mdlfile.ReadInt32();
 					if (group != 0)
 					{
-						// TODO handle skingroup accordingly
+						int skinFrameCount = mdlfile.ReadInt32();
+						skins[i] = new Skin(skinFrameCount);
+						for (s = 0; s < skinFrameCount; s++)
+						{
+							skins[i].durations[s] = mdlfile.ReadSingle();
+						}
+						for (s = 0; s < skinFrameCount; s++)
+						{
+							skins[i].images[s] = new Image(mdlfile, header);
+						}
 					}
-					skins[i] = new Skin(mdlfile, header);
+					else
+						skins[i] = new Skin(new Image(mdlfile, header));
 				}
 
 				verts = new Vertex[header.vertexcount];
@@ -76,7 +85,7 @@ namespace yaqmv
 					tris[i] = new Triangle(mdlfile, header);
 
 				List<Frame> framelist = new List<Frame>(header.framecount);
-				List<Anim> animlist = new List<Anim>();
+				List<Anim> animlist = [];
 				for (i = 0; i < header.framecount; i++)
 				{
 					group = mdlfile.ReadInt32();
@@ -195,11 +204,28 @@ namespace yaqmv
 				average_size = 0;
 			}
 		};
+
 		internal class Skin
+		{
+			public Image[] images;
+			public float[] durations;
+			public Skin(Image i)
+			{
+				images = [i];
+				durations = [0f];
+			}
+			public Skin(int frames)
+			{
+				images = new Image[frames];
+				durations = new float[frames];
+			}
+		}
+
+		internal class Image
 		{
 			public byte[] indices;
 			public byte[] pixels;
-			public Skin(BinaryReader mdl, Header h)
+			public Image(BinaryReader mdl, Header h)
 			{
 				indices = mdl.ReadBytes(h.skinwidth * h.skinheight);
 				pixels = new byte[h.skinwidth * h.skinheight * 4];
@@ -304,7 +330,7 @@ namespace yaqmv
 				mins = new Coord();
 				maxs = new Coord();
 				name = "";
-				positions = new Coord[] { };
+				positions = [];
 			}
 			public Frame(BinaryReader mdl, Header h)
 			{
