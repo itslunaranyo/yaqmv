@@ -16,18 +16,18 @@ namespace yaqmv
 {
 	public partial class ModelWindow : GLWpfControl
 	{
-		private ModelRenderer _modelRenderer;
+		private ModelRenderer? _modelRenderer;
 		public ModelWindow()
 		{
-			var settings = new GLWpfControlSettings
-			{
-				MajorVersion = 3,
-				MinorVersion = 3,
-				Profile = OpenTK.Windowing.Common.ContextProfile.Core
-			};
 			Focusable = false;
+
+			MouseMove += new MouseEventHandler(OnMouseMove);
+			MouseDown += new MouseButtonEventHandler(OnMouseDown);
+		}
+
+		public void Init(GLWpfControlSettings settings)
+		{
 			Start(settings);
-			_modelRenderer = new ModelRenderer();
 
 			GL.ClearColor(0.2f, 0.2f, 0.2f, 1.0f);
 			GL.Viewport(0, 0, (int)ActualWidth, (int)ActualHeight);
@@ -35,8 +35,7 @@ namespace yaqmv
 			GL.Enable(EnableCap.CullFace);
 			GL.CullFace(CullFaceMode.Front);
 
-			MouseMove += new MouseEventHandler(OnMouseMove);
-			MouseDown += new MouseButtonEventHandler(OnMouseDown);
+			_modelRenderer = new ModelRenderer();
 		}
 
 		public void SetMode(int mode)

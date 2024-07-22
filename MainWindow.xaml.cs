@@ -13,6 +13,8 @@ using System.Drawing;
 using Microsoft.Win32;
 using System.ComponentModel;
 using System.Windows.Threading;
+//using OpenTK.Windowing.Common;
+using OpenTK.Wpf;
 
 namespace yaqmv
 {
@@ -26,9 +28,27 @@ namespace yaqmv
 		internal ModelState _modelState;
 		private DispatcherTimer _time;
 
+		public static GLWpfControlSettings GlobalGLWPFSettings { get; private set; }
+
 		public MainWindow()
 		{
 			InitializeComponent();
+
+			// start the GL windows from here and not in their constructors so we can pass
+			// the shared context around
+			GlobalGLWPFSettings = new GLWpfControlSettings
+			{
+				MajorVersion = 3,
+				MinorVersion = 3,
+				Profile = OpenTK.Windowing.Common.ContextProfile.Core
+			};
+			_modelWindow = (ModelWindow)FindName("ModelWindow");
+			_modelWindow.Init(GlobalGLWPFSettings);
+
+			GlobalGLWPFSettings.SharedContext = (OpenTK.Windowing.Desktop.IGLFWGraphicsContext?)_modelWindow.Context;
+
+
+
 			DataContext = this;
 
 			_time = new DispatcherTimer();
@@ -36,7 +56,6 @@ namespace yaqmv
 			_time.Tick += Anim_Tick;
 			_time.Start();
 
-			_modelWindow = (ModelWindow)FindName("ModelWindow");
 			_loadedAsset = new ModelAsset();
 			Playing = false;
 		}

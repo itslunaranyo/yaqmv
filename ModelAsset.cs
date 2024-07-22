@@ -303,6 +303,8 @@ namespace yaqmv
 			public Anim(string prefix, int startframe, bool grp = false, int endframe = -1)
 			{
 				name = prefix;
+				mins = new Coord();
+				maxs = new Coord();
 				first = startframe;
 				isGroup = grp;
 				if (grp)
