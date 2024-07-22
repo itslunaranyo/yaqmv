@@ -224,7 +224,18 @@ namespace yaqmv
 		}
 		private void OnMouseWheel(object sender, MouseWheelEventArgs e)
 		{
-			if (e.Delta > 0) StepForward();
+			// if a mousewheel event bubbles past something that could have handled it if it were
+			// focused, focus it and try again
+			var target = e.Source as UIElement;
+			if (target != null && target.Focusable && !target.IsFocused)
+			{
+				target.Focus();
+				target.RaiseEvent(e);
+				return;
+			}
+
+			// default to scrolling through the animation for mousewheels anywhere else
+			if (e.Delta < 0) StepForward();
 			else StepBackward();
 		}
 		private void OnKeyDown(object sender, KeyEventArgs e)
