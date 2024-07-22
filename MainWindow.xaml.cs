@@ -28,7 +28,7 @@ namespace yaqmv
 		internal ModelState _modelState;
 		private DispatcherTimer _time;
 
-		public static GLWpfControlSettings GlobalGLWPFSettings { get; private set; }
+		public GLWpfControlSettings GlobalGLWPFSettings { get; private set; }
 
 		public MainWindow()
 		{
