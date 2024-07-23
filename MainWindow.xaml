@@ -10,7 +10,7 @@
  		Unloaded="Window_Unloaded"
 		KeyDown="OnKeyDown"
 		MouseWheel="OnMouseWheel"
-       Title="YAQ Model Viewer" Height="720" Width="540">
+       Title="YAQ Model Viewer" Height="640" Width="960">
 	<Grid Background="#FFDFDFDF">
 		<Grid.RowDefinitions>
 			<RowDefinition Height="Auto" />
@@ -23,100 +23,154 @@
 				<MenuItem Header="_Exit" Click="MenuFileQuit" />
 			</MenuItem>
 		</Menu>
-		<Grid  Grid.Row="1">
-			<Grid.RowDefinitions>
-				<RowDefinition Height="*" />
-				<RowDefinition Height="80" />
-				<RowDefinition Height="40" />
-			</Grid.RowDefinitions>
-			<local:ModelWindow Grid.Row="0"
-				x:Name="ModelWindow" 
-				Render="OnRender"
-				SizeChanged="OnSizeChanged"
-			/>
-			<Grid Grid.Row="1">
-				<Grid.ColumnDefinitions>
-					<ColumnDefinition Width="130"/>
-					<ColumnDefinition/>
-					<ColumnDefinition Width="160"/>
-				</Grid.ColumnDefinitions>
+		<Grid Grid.Row="1">
+			<Grid.ColumnDefinitions>
+				<ColumnDefinition Width="450" />
+				<ColumnDefinition Width="6" />
+				<ColumnDefinition Width="*" />
+			</Grid.ColumnDefinitions>
+			<Grid Grid.Column="0" Margin="1">
+
 				<Grid.RowDefinitions>
 					<RowDefinition Height="*" />
+					<RowDefinition Height="80" />
+					<RowDefinition Height="40" />
 				</Grid.RowDefinitions>
-				<StackPanel Margin="6" Grid.Column="0">
-					<WrapPanel>
-						<TextBlock Text="Render Mode:" />
-						<ComboBox x:Name="ModeSelect" 
-								Width="114" 
-								IsReadOnly="True"
-								SelectionChanged="ModeSelect_SelectionChanged" SelectedIndex="0">
-							<ComboBoxItem Content="Textured"/>
-							<ComboBoxItem Content="Textured Wire"/>
-							<ComboBoxItem Content="Shaded"/>
-							<ComboBoxItem Content="Shaded Wire"/>
-							<ComboBoxItem Content="Wireframe"/>
-						</ComboBox>
-					</WrapPanel>
-				</StackPanel>
-				<StackPanel Margin="6" Grid.Column="1">
-					<WrapPanel>
-						<TextBlock x:Name="TStats" Text="{Binding StatsText}"/>
-					</WrapPanel>
-				</StackPanel>
-				<StackPanel Margin="6" Grid.Column="2">
-					<WrapPanel>
-						<TextBlock Text="Sequence:" />
-						<ComboBox x:Name="AnimSelect" 
+				<local:ModelWindow Grid.Row="0"
+					x:Name="ModelWindow" 
+					Render="OnRender"
+					SizeChanged="OnSizeChanged"
+				/>
+				<Grid Grid.Row="1">
+					<Grid.ColumnDefinitions>
+						<ColumnDefinition Width="130"/>
+						<ColumnDefinition/>
+						<ColumnDefinition Width="160"/>
+					</Grid.ColumnDefinitions>
+					<StackPanel Margin="6" Grid.Column="0">
+						<WrapPanel>
+							<TextBlock Text="Render Mode:" />
+							<ComboBox x:Name="ModeSelect" 
+									Width="114" 
+									IsReadOnly="True"
+									SelectionChanged="ModeSelect_SelectionChanged" SelectedIndex="0">
+								<ComboBoxItem Content="Textured"/>
+								<ComboBoxItem Content="Textured Wire"/>
+								<ComboBoxItem Content="Shaded"/>
+								<ComboBoxItem Content="Shaded Wire"/>
+								<ComboBoxItem Content="Wireframe"/>
+							</ComboBox>
+						</WrapPanel>
+					</StackPanel>
+					<StackPanel Margin="6" Grid.Column="1">
+						<WrapPanel>
+							<TextBlock x:Name="TStats" Text="{Binding StatsText}"/>
+						</WrapPanel>
+					</StackPanel>
+					<StackPanel Margin="6" Grid.Column="2">
+						<WrapPanel>
+							<TextBlock Text="Sequence:" />
+							<ComboBox x:Name="AnimSelect" 
 								Width="144" 
 								IsReadOnly="True"
 								SelectionChanged="AnimSelect_SelectionChanged"/>
+						</WrapPanel>
+						<WrapPanel Height="40">
+							<TextBlock x:Name="TAnimStats" Text="{Binding AnimStatsText}"/>
+						</WrapPanel>
+					</StackPanel>
+				</Grid>
+				<Grid Grid.Row="2">
+					<Grid.ColumnDefinitions>
+						<ColumnDefinition Width="38"/>
+						<ColumnDefinition Width="*"/>
+						<ColumnDefinition Width="72"/>
+					</Grid.ColumnDefinitions>
+					<Grid.RowDefinitions>
+						<RowDefinition Height="*" />
+					</Grid.RowDefinitions>
+					<WrapPanel>
+						<Button x:Name="BStart" Content="⏮"
+							HorizontalAlignment="Left"
+							Margin="10,6,0,6"			
+							VerticalAlignment="Top" FontFamily="Segoe UI Symbol"
+							Width="28" Height="28"
+							FontSize="16" BorderThickness="1,1,1,1"
+							Click="BSkipStart_Click"/>
 					</WrapPanel>
-					<WrapPanel Height="40">
-						<TextBlock x:Name="TAnimStats" Text="{Binding AnimStatsText}"/>
+					<local:Timeline Grid.Column="1" x:Name="Timeline" 
+						VerticalAlignment="Top" 
+						HorizontalAlignment="Stretch"
+						Margin="6,6,6,6"
+						Value="{Binding TimelineValue, Mode=TwoWay}"
+						Minimum="{Binding TimelineMin}"
+						Maximum="{Binding TimelineMax}"
+						ValueChanged="Timeline_ValueChanged"
+						Height="28"
+					/>
+					<WrapPanel Grid.Column="2">
+						<Button x:Name="BPlay" Content="▶"
+							HorizontalAlignment="Left"
+							Margin="0,6,0,6"
+							VerticalAlignment="Top" FontFamily="Segoe UI Symbol" Width="28" Height="28" FontSize="16" BorderThickness="1,1,1,1"
+							Click="BPlayPause_Click"
+						/>
+						<Button x:Name="BEnd" Content="⏭"
+							HorizontalAlignment="Left"
+							Margin="6,6,10,6"
+							VerticalAlignment="Top" FontFamily="Segoe UI Symbol" Width="28" Height="28" FontSize="16" BorderThickness="1,1,1,1"
+							Click="BSkipEnd_Click"
+						/>
 					</WrapPanel>
-				</StackPanel>
+				</Grid>
+
 			</Grid>
-			<Grid Grid.Row="2">
-				<Grid.ColumnDefinitions>
-					<ColumnDefinition Width="38"/>
-					<ColumnDefinition Width="*"/>
-					<ColumnDefinition Width="72"/>
-				</Grid.ColumnDefinitions>
+			<GridSplitter Grid.Column="1" Width="6" HorizontalAlignment="Stretch">
+				<GridSplitter.Template>
+					<ControlTemplate TargetType="{x:Type GridSplitter}">
+						<Grid>
+							<TextBlock
+								HorizontalAlignment="Center"
+								VerticalAlignment="Center"
+								Text="⁞" />
+							<Rectangle Margin="0,2,0,2">
+								<Rectangle.Fill>
+									<LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+										<GradientStop Color="#40000000" Offset="0.0" />
+										<GradientStop Color="#00FFFFFF" Offset="0.32" />
+										<GradientStop Color="#00FFFFFF" Offset="0.65" />
+										<GradientStop Color="#80000000" Offset="1.0" />
+									</LinearGradientBrush>
+								</Rectangle.Fill>
+							</Rectangle>
+						</Grid>
+					</ControlTemplate>
+				</GridSplitter.Template>
+			</GridSplitter>
+			<Grid Grid.Column="2" Margin="1">
 				<Grid.RowDefinitions>
 					<RowDefinition Height="*" />
+					<RowDefinition Height="120" />
 				</Grid.RowDefinitions>
-				<WrapPanel>
-					<Button x:Name="BStart" Content="⏮"
-				HorizontalAlignment="Left"
-				Margin="10,6,0,6"			
-				VerticalAlignment="Top" FontFamily="Segoe UI Symbol"
-				Width="28" Height="28"
-				FontSize="16" BorderThickness="1,1,1,1"
-				Click="BSkipStart_Click"/>
-				</WrapPanel>
-				<local:Timeline Grid.Column="1" x:Name="Timeline" 
-				VerticalAlignment="Top" 
-				HorizontalAlignment="Stretch"
-				Margin="6,6,6,6"
-				Value="{Binding TimelineValue, Mode=TwoWay}"
-				Minimum="{Binding TimelineMin}"
-				Maximum="{Binding TimelineMax}"
-				ValueChanged="Timeline_ValueChanged"
-				Height="28"
-				/>
-				<WrapPanel Grid.Column="2">
 
-					<Button x:Name="BPlay" Content="▶"
-				HorizontalAlignment="Left"
-				Margin="0,6,0,6"
-				VerticalAlignment="Top" FontFamily="Segoe UI Symbol" Width="28" Height="28" FontSize="16" BorderThickness="1,1,1,1"
-				Click="BPlayPause_Click"/>
-					<Button x:Name="BEnd" Content="⏭"
-				HorizontalAlignment="Left"
-				Margin="6,6,10,6"
-				VerticalAlignment="Top" FontFamily="Segoe UI Symbol" Width="28" Height="28" FontSize="16" BorderThickness="1,1,1,1"
-				Click="BSkipEnd_Click"/>
-				</WrapPanel>
+				<Grid Grid.Row="1">
+					<Grid.ColumnDefinitions>
+						<ColumnDefinition Width="145"/>
+						<ColumnDefinition/>
+						<ColumnDefinition Width="160"/>
+					</Grid.ColumnDefinitions>
+					<StackPanel Margin="6" Grid.Column="0">
+						<WrapPanel>
+							<TextBlock Text="Skin:" />
+						</WrapPanel>
+						<WrapPanel>
+						<ComboBox x:Name="SkinSelect" 
+							Width="80" 
+							IsReadOnly="True"
+							SelectionChanged="SkinSelect_SelectionChanged"/>
+						</WrapPanel>
+					</StackPanel>
+				</Grid>
 			</Grid>
 		</Grid>
 		
