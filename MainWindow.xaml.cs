@@ -72,11 +72,20 @@ namespace yaqmv
 		static double skinTime = 0;
 		private void OnRender(TimeSpan delta)
 		{
-			// TODO: this won't work on skingroups past the first one
+			int i;
+			int sf = 0;
+
+
 			if (_loadedAsset.skins.Length > 0)
 			{
-				int i;
-				int skinLength = _loadedAsset.skins[_modelState.Skin].images.Length;
+				int skinLength;
+				for (i = 0; i < _modelState.Skin; i++)
+				{
+					skinLength = _loadedAsset.skins[i].images.Length;
+					sf += skinLength;
+				}
+				_modelState.Skinframe = sf;
+				skinLength = _loadedAsset.skins[_modelState.Skin].images.Length;
 				if (skinLength > 1)
 				{
 					_modelState.Skinframe = 0;
@@ -92,7 +101,7 @@ namespace yaqmv
 					}
 
 					skinTime += delta.TotalSeconds;
-					_modelState.Skinframe = i;
+					_modelState.Skinframe = i+sf;
 				}
 			}
 			_modelWindow.OnRender(delta, _modelState);
@@ -106,8 +115,8 @@ namespace yaqmv
 			SelectAnim(0);
 			AnimSelect.ItemsSource = _loadedAsset.AnimNames;
 			AnimSelect.SelectedIndex = 0;
-		//	SkinSelect.ItemsSource = _loadedAsset.SkinNames;
-		//	SkinSelect.SelectedIndex = 0;
+			SkinSelect.ItemsSource = _loadedAsset.SkinNames;
+			SkinSelect.SelectedIndex = 0;
 			NotifyPropertyChanged("StatsText");
 		}
 
@@ -279,7 +288,7 @@ namespace yaqmv
 
 		private void SkinSelect_SelectionChanged(object sender, SelectionChangedEventArgs e)
 		{
-			//SelectedSkin = SkinSelect.SelectedIndex == -1 ? 0 : SkinSelect.SelectedIndex;
+			SelectedSkin = SkinSelect.SelectedIndex == -1 ? 0 : SkinSelect.SelectedIndex;
 		}
 
 		private void Timeline_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
