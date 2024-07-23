@@ -15,94 +15,86 @@
 		<Grid.RowDefinitions>
 			<RowDefinition Height="Auto" />
 			<RowDefinition Height="*" />
-			<RowDefinition Height="120" />
-			<RowDefinition Height="44" />
 		</Grid.RowDefinitions>
-		<Menu VerticalAlignment="Top">
+		<Menu VerticalAlignment="Top"  Grid.Row="0">
 			<MenuItem Header="_File">
 				<MenuItem Header="_Open" Click="MenuFileOpen" />
 				<Separator />
 				<MenuItem Header="_Exit" Click="MenuFileQuit" />
 			</MenuItem>
 		</Menu>
-		<local:ModelWindow 
+		<Grid  Grid.Row="1">
+			<Grid.RowDefinitions>
+				<RowDefinition Height="*" />
+				<RowDefinition Height="80" />
+				<RowDefinition Height="40" />
+			</Grid.RowDefinitions>
+			<local:ModelWindow Grid.Row="0"
 				x:Name="ModelWindow" 
 				Render="OnRender"
 				SizeChanged="OnSizeChanged"
-				Grid.Row="1"
 			/>
-		<Grid Grid.Row="2">
-			<Grid.ColumnDefinitions>
-				<ColumnDefinition Width="160"/>
-				<ColumnDefinition/>
-				<ColumnDefinition Width="130"/>
-				<ColumnDefinition Width="100"/>
-			</Grid.ColumnDefinitions>
-			<Grid.RowDefinitions>
-				<RowDefinition Height="*" />
-			</Grid.RowDefinitions>
-			<StackPanel Margin="8">
+			<Grid Grid.Row="1">
+				<Grid.ColumnDefinitions>
+					<ColumnDefinition Width="130"/>
+					<ColumnDefinition/>
+					<ColumnDefinition Width="160"/>
+				</Grid.ColumnDefinitions>
+				<Grid.RowDefinitions>
+					<RowDefinition Height="*" />
+				</Grid.RowDefinitions>
+				<StackPanel Margin="6" Grid.Column="0">
+					<WrapPanel>
+						<TextBlock Text="Render Mode:" />
+						<ComboBox x:Name="ModeSelect" 
+								Width="114" 
+								IsReadOnly="True"
+								SelectionChanged="ModeSelect_SelectionChanged" SelectedIndex="0">
+							<ComboBoxItem Content="Textured"/>
+							<ComboBoxItem Content="Textured Wire"/>
+							<ComboBoxItem Content="Shaded"/>
+							<ComboBoxItem Content="Shaded Wire"/>
+							<ComboBoxItem Content="Wireframe"/>
+						</ComboBox>
+					</WrapPanel>
+				</StackPanel>
+				<StackPanel Margin="6" Grid.Column="1">
+					<WrapPanel>
+						<TextBlock x:Name="TStats" Text="{Binding StatsText}"/>
+					</WrapPanel>
+				</StackPanel>
+				<StackPanel Margin="6" Grid.Column="2">
+					<WrapPanel>
+						<TextBlock Text="Sequence:" />
+						<ComboBox x:Name="AnimSelect" 
+								Width="144" 
+								IsReadOnly="True"
+								SelectionChanged="AnimSelect_SelectionChanged"/>
+					</WrapPanel>
+					<WrapPanel Height="40">
+						<TextBlock x:Name="TAnimStats" Text="{Binding AnimStatsText}"/>
+					</WrapPanel>
+				</StackPanel>
+			</Grid>
+			<Grid Grid.Row="2">
+				<Grid.ColumnDefinitions>
+					<ColumnDefinition Width="38"/>
+					<ColumnDefinition Width="*"/>
+					<ColumnDefinition Width="72"/>
+				</Grid.ColumnDefinitions>
+				<Grid.RowDefinitions>
+					<RowDefinition Height="*" />
+				</Grid.RowDefinitions>
 				<WrapPanel>
-					<TextBlock Text="Sequence:" />
-					<ComboBox x:Name="AnimSelect" 
-							  Width="144" 
-							  IsReadOnly="True"
-							  SelectionChanged="AnimSelect_SelectionChanged"/>
-				</WrapPanel>
-				<WrapPanel Height="40">
-					<TextBlock x:Name="TAnimStats" Text="{Binding AnimStatsText}"/>
-				</WrapPanel>
-				<WrapPanel>
-					<TextBlock x:Name="TCurrentFrame" Text="{Binding CurrentFrameText}"/>
-				</WrapPanel>
-			</StackPanel>
-			<StackPanel Margin="8" Grid.Column="2">
-				<WrapPanel>
-					<TextBlock Text="Render Mode:" />
-					<ComboBox x:Name="ModeSelect" 
-							  Width="114" 
-							  IsReadOnly="True"
-							  SelectionChanged="ModeSelect_SelectionChanged" SelectedIndex="0">
-						<ComboBoxItem Content="Textured"/>
-						<ComboBoxItem Content="Textured Wire"/>
-						<ComboBoxItem Content="Shaded"/>
-						<ComboBoxItem Content="Shaded Wire"/>
-						<ComboBoxItem Content="Wireframe"/>
-					</ComboBox>
-				</WrapPanel>
-			</StackPanel>
-			<StackPanel Margin="8" Grid.Column="3">
-				<WrapPanel>
-					<TextBlock Text="Skin:" />
-					<ComboBox x:Name="SkinSelect" 
-							  Width="80" 
-							  IsReadOnly="True"
-							  SelectionChanged="SkinSelect_SelectionChanged"/>
-				</WrapPanel>
-				<WrapPanel>
-					<TextBlock x:Name="TStats" Text="{Binding StatsText}"/>
-				</WrapPanel>
-			</StackPanel>
-		</Grid>
-		<Grid Grid.Row="3">
-			<Grid.ColumnDefinitions>
-				<ColumnDefinition Width="38"/>
-				<ColumnDefinition Width="*"/>
-				<ColumnDefinition Width="72"/>
-			</Grid.ColumnDefinitions>
-			<Grid.RowDefinitions>
-				<RowDefinition Height="*" />
-			</Grid.RowDefinitions>
-			<WrapPanel>
-				<Button x:Name="BStart" Content="⏮"
+					<Button x:Name="BStart" Content="⏮"
 				HorizontalAlignment="Left"
 				Margin="10,6,0,6"			
 				VerticalAlignment="Top" FontFamily="Segoe UI Symbol"
 				Width="28" Height="28"
 				FontSize="16" BorderThickness="1,1,1,1"
 				Click="BSkipStart_Click"/>
-			</WrapPanel>
-			<local:Timeline Grid.Column="1" x:Name="Timeline" 
+				</WrapPanel>
+				<local:Timeline Grid.Column="1" x:Name="Timeline" 
 				VerticalAlignment="Top" 
 				HorizontalAlignment="Stretch"
 				Margin="6,6,6,6"
@@ -112,19 +104,21 @@
 				ValueChanged="Timeline_ValueChanged"
 				Height="28"
 				/>
-			<WrapPanel Grid.Column="2">
+				<WrapPanel Grid.Column="2">
 
-				<Button x:Name="BPlay" Content="▶"
+					<Button x:Name="BPlay" Content="▶"
 				HorizontalAlignment="Left"
 				Margin="0,6,0,6"
 				VerticalAlignment="Top" FontFamily="Segoe UI Symbol" Width="28" Height="28" FontSize="16" BorderThickness="1,1,1,1"
 				Click="BPlayPause_Click"/>
-				<Button x:Name="BEnd" Content="⏭"
+					<Button x:Name="BEnd" Content="⏭"
 				HorizontalAlignment="Left"
 				Margin="6,6,10,6"
 				VerticalAlignment="Top" FontFamily="Segoe UI Symbol" Width="28" Height="28" FontSize="16" BorderThickness="1,1,1,1"
 				Click="BSkipEnd_Click"/>
-			</WrapPanel>
+				</WrapPanel>
+			</Grid>
 		</Grid>
+		
 	</Grid>
 </Window>
