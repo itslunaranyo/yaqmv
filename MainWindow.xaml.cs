@@ -248,7 +248,7 @@ namespace yaqmv
 		{
 			if (e.Key == Key.F)
 			{
-				Camera.Recenter(_loadedAsset.CenterOfFrame(0), _loadedAsset.RadiusOfFrame(0));
+				Camera3D.Recenter(_loadedAsset.CenterOfFrame(0), _loadedAsset.RadiusOfFrame(0));
 			}
 			if (e.Key == Key.K)
 			{

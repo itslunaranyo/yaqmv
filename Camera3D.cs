@@ -8,7 +8,7 @@ using System.Windows.Controls;
 
 namespace yaqmv
 {
-    internal static class Camera
+    internal static class Camera3D
     {
 		private static float _pitch = 0.32f;
 		private static float _yaw = -0.64f;

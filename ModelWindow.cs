@@ -41,7 +41,7 @@ namespace yaqmv
 		internal void LoadModel(ModelAsset mdl)
 		{
 			_modelRenderer.DisplayModel(mdl);
-			Camera.Reset(mdl.CenterOfFrame(0), mdl.RadiusOfFrame(0));
+			Camera3D.Reset(mdl.CenterOfFrame(0), mdl.RadiusOfFrame(0));
 		}
 
 		public void OnRender(TimeSpan delta, ModelState _ms)
@@ -79,11 +79,11 @@ namespace yaqmv
 			var delta = newPos - _mousePos;
 
 			if (_buttonDownLeft)
-				Camera.Orbit((float)delta.X, (float)delta.Y);
+				Camera3D.Orbit((float)delta.X, (float)delta.Y);
 			else if (_buttonDownRight)
-				Camera.Dolly(-(float)delta.Y);
+				Camera3D.Dolly(-(float)delta.Y);
 			else if (_buttonDownMiddle)
-				Camera.Pan((float)delta.X, (float)delta.Y);
+				Camera3D.Pan((float)delta.X, (float)delta.Y);
 
 			if (Mouse.LeftButton != MouseButtonState.Pressed)
 				_buttonDownLeft = false;

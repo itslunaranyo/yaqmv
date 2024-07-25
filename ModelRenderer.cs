@@ -72,8 +72,8 @@ namespace yaqmv
 			float vfov = MathHelper.DegreesToRadians(60f);
 
 			Matrix4 matpersp = Matrix4.CreatePerspectiveFieldOfView(vfov, asp, 1f, 2000.0f);
-			Matrix4 matview = Matrix4.LookAt(Camera.Origin, Camera.Focus, new Vector3(0, 0, 1));
-			Matrix4 matmodel = Matrix4.CreateRotationZ(Camera.Yaw);
+			Matrix4 matview = Matrix4.LookAt(Camera3D.Origin, Camera3D.Focus, new Vector3(0, 0, 1));
+			Matrix4 matmodel = Matrix4.CreateRotationZ(Camera3D.Yaw);
 
 			GL.Viewport(0, 0, (int)w, (int)h);
 			_currentModel.Bind(ms.Frame);
