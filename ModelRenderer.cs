@@ -57,29 +57,25 @@ namespace yaqmv
 					_skins[t++] = new Texture(mdl.SkinWidth, mdl.SkinHeight, mdl.skins[i].images[s].pixels);
 			}
 		}
-		internal void Resize(int w, int h)
-		{
-			_width = w;
-			_height = h;
-		}
 
 		public void SetMode(int mode)
 		{
 			_rmode = (RenderMode)mode;
 		}
 
-		internal void Render(ModelState ms)
+		internal void Render(ModelState ms, float w, float h)
 		{
 			if (_currentModel == null)
 				return;
 
-			float asp = _width / _height;
+			float asp = w / h;
 			float vfov = MathHelper.DegreesToRadians(60f);
 
 			Matrix4 matpersp = Matrix4.CreatePerspectiveFieldOfView(vfov, asp, 1f, 2000.0f);
 			Matrix4 matview = Matrix4.LookAt(Camera.Origin, Camera.Focus, new Vector3(0, 0, 1));
 			Matrix4 matmodel = Matrix4.CreateRotationZ(Camera.Yaw);
 
+			GL.Viewport(0, 0, (int)w, (int)h);
 			_currentModel.Bind(ms.Frame);
 
 			if (_rmode == RenderMode.Textured)

@@ -67,7 +67,7 @@ namespace yaqmv
 		}
 		private void Window_Unloaded(object sender, RoutedEventArgs e) { _modelWindow.OnUnload(sender, e); }
 
-		private void OnSizeChanged(object sender, SizeChangedEventArgs e) { _modelWindow.OnSizeChanged(sender, e); }
+		//private void OnSizeChanged(object sender, SizeChangedEventArgs e) { _modelWindow.OnSizeChanged(sender, e); }
 
 		static double skinTime = 0;
 		private void OnRender(TimeSpan delta)

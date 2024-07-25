@@ -29,11 +29,6 @@ namespace yaqmv
 		{
 			Start(settings);
 
-			GL.ClearColor(0.2f, 0.2f, 0.2f, 1.0f);
-			GL.Viewport(0, 0, (int)ActualWidth, (int)ActualHeight);
-			GL.Enable(EnableCap.DepthTest);
-			GL.Enable(EnableCap.CullFace);
-			GL.CullFace(CullFaceMode.Front);
 
 			_modelRenderer = new ModelRenderer();
 		}
@@ -46,22 +41,18 @@ namespace yaqmv
 		internal void LoadModel(ModelAsset mdl)
 		{
 			_modelRenderer.DisplayModel(mdl);
-			_modelRenderer.Resize((int)ActualWidth, (int)ActualHeight);
 			Camera.Reset(mdl.CenterOfFrame(0), mdl.RadiusOfFrame(0));
-		}
-
-		public void OnSizeChanged(object sender, SizeChangedEventArgs e)
-		{
-			_modelRenderer.Resize((int)ActualWidth, (int)ActualHeight);
-			GL.Viewport(0, 0, (int)ActualWidth, (int)ActualHeight);
-			GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 		}
 
 		public void OnRender(TimeSpan delta, ModelState _ms)
 		{
+			GL.ClearColor(0.2f, 0.2f, 0.2f, 1.0f);
 			GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
+			GL.Enable(EnableCap.DepthTest);
+			GL.Enable(EnableCap.CullFace);
+			GL.CullFace(CullFaceMode.Front);
 
-			_modelRenderer.Render(_ms);
+			_modelRenderer.Render(_ms, (float)ActualWidth, (float)ActualHeight);
 		}
 		public void OnUnload(object sender, RoutedEventArgs e)
 		{

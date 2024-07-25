@@ -38,8 +38,7 @@
 				</Grid.RowDefinitions>
 				<local:ModelWindow Grid.Row="0"
 					x:Name="ModelWindow" 
-					Render="OnRender"
-					SizeChanged="OnSizeChanged"
+					Render="OnRender"					
 				/>
 				<Grid Grid.Row="1">
 					<Grid.ColumnDefinitions>
