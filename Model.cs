@@ -59,7 +59,7 @@ namespace yaqmv
 			GL.BufferData(BufferTarget.ElementArrayBuffer, indices.Length * sizeof(uint), indices, BufferUsageHint.StaticDraw);
 
 		}
-		public void Bind(int pose)
+		public void Bind(int pose = 0)
 		{
 			GL.BindVertexArray(_vertexArrayObject);
 			GL.VertexAttribPointer(_attribUV, 2, VertexAttribPointerType.Float, false, 2 * sizeof(float), 0);
