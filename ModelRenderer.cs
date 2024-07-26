@@ -17,10 +17,8 @@ namespace yaqmv
 		private Shader _shTexturedShaded;
 		private Shader _shFlat;
 		private Shader _shWhiteShaded;
-		private Texture[] _skins;
 		private Model? _currentModel;
 		private ModelAsset? _currentAsset;
-		private float _width, _height;
 		private bool _disposed;
 		private enum RenderMode { Textured, TexturedWire, Shaded, ShadedWire, Wire };
 		private RenderMode _rmode;
@@ -32,30 +30,15 @@ namespace yaqmv
 			_shFlat = new Shader("shaders/default_v.shader", "shaders/flat_f.shader");
 			_shWhiteShaded = new Shader("shaders/default_v.shader", "shaders/shaded_f.shader");
 
-			_skins = [];
-
 			_rmode = RenderMode.Textured;
 			GL.DepthFunc(DepthFunction.Lequal);
 		}
 		internal void DisplayModel(ModelAsset mdl)
 		{
 			int i, s, t;
-			int texcount = 0;
 			_currentAsset = mdl;
 			_currentModel?.Dispose();
 			_currentModel = ModelConvertor.Convert(mdl);
-
-			for (i = 0; i < mdl.SkinCount; i++)
-				for (s = 0; s < mdl.skins[i].images.Length; s++)
-					texcount++;
-
-			_skins = new Texture[texcount];
-			t = 0;
-			for (i = 0; i < mdl.SkinCount; i++)
-			{
-				for (s = 0; s < mdl.skins[i].images.Length; s++)
-					_skins[t++] = new Texture(mdl.SkinWidth, mdl.SkinHeight, mdl.skins[i].images[s].pixels);
-			}
 		}
 
 		public void SetMode(int mode)
@@ -81,7 +64,7 @@ namespace yaqmv
 			if (_rmode == RenderMode.Textured)
 			{
 				GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Fill);
-				_skins[ms.Skinframe].Bind();
+				_currentAsset?.skins[ms.Skin].images[ms.Skinframe].Tex.Bind();
 				_shTexturedShaded.Use();
 				_shTexturedShaded.SetUniform("model", matmodel);
 				_shTexturedShaded.SetUniform("view", matview);
@@ -93,7 +76,7 @@ namespace yaqmv
 			{
 				GL.Enable(EnableCap.PolygonOffsetFill);
 				GL.PolygonOffset(1f, 1);
-				_skins[ms.Skinframe].Bind();
+				_currentAsset?.skins[ms.Skin].images[ms.Skinframe].Tex.Bind();
 				_shTexturedShaded.Use();
 				_shTexturedShaded.SetUniform("model", matmodel);
 				_shTexturedShaded.SetUniform("view", matview);

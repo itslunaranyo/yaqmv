@@ -223,10 +223,12 @@ namespace yaqmv
 
 		internal class Image
 		{
-			public byte[] indices;
-			public byte[] pixels;
+			public Texture Tex;
+
 			public Image(BinaryReader mdl, Header h)
 			{
+				byte[] indices;
+				byte[] pixels;
 				indices = mdl.ReadBytes(h.skinwidth * h.skinheight);
 				pixels = new byte[h.skinwidth * h.skinheight * 4];
 				int j = 0;
@@ -238,6 +240,7 @@ namespace yaqmv
 					pixels[j++] = color.Item3;
 					pixels[j++] = color.Item4;
 				}
+				Tex = new Texture(h.skinwidth, h.skinheight, pixels);
 			}
 		}
 		internal class Vertex

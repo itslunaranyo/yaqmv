@@ -73,18 +73,10 @@ namespace yaqmv
 		private void OnRender(TimeSpan delta)
 		{
 			int i;
-			int sf = 0;
-
 
 			if (_loadedAsset.skins.Length > 0)
 			{
 				int skinLength;
-				for (i = 0; i < _modelState.Skin; i++)
-				{
-					skinLength = _loadedAsset.skins[i].images.Length;
-					sf += skinLength;
-				}
-				_modelState.Skinframe = sf;
 				skinLength = _loadedAsset.skins[_modelState.Skin].images.Length;
 				if (skinLength > 1)
 				{
@@ -101,7 +93,7 @@ namespace yaqmv
 					}
 
 					skinTime += delta.TotalSeconds;
-					_modelState.Skinframe = i+sf;
+					_modelState.Skinframe = i;
 				}
 			}
 			_modelWindow.OnRender(delta, _modelState);
