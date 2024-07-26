@@ -17,7 +17,18 @@ namespace yaqmv
         private int _handle;
         private bool _disposed = false;
 
-        public Shader(string vertexPath, string fragmentPath)
+		public static Shader? TexturedShaded;
+		public static Shader? Flat;
+		public static Shader? WhiteShaded;
+		
+		public static void Init()
+		{
+			TexturedShaded = new Shader("shaders/default_v.shader", "shaders/default_f.shader");
+			Flat = new Shader("shaders/default_v.shader", "shaders/flat_f.shader");
+			WhiteShaded = new Shader("shaders/default_v.shader", "shaders/shaded_f.shader");
+		}
+
+		public Shader(string vertexPath, string fragmentPath)
         {
 			string vtxShaderSource = Utility.ReadResourceText(vertexPath);
 			var vtxShader = GL.CreateShader(ShaderType.VertexShader);

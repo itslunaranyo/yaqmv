@@ -48,6 +48,7 @@ namespace yaqmv
 			GlobalGLWPFSettings.SharedContext = (OpenTK.Windowing.Desktop.IGLFWGraphicsContext?)_modelWindow.Context;
 
 
+			Shader.Init();
 
 			DataContext = this;
 
