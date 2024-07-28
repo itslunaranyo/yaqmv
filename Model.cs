@@ -19,8 +19,8 @@ namespace yaqmv
 		public int Elements;
 
 		private readonly int _attribPos = 0;
-		private readonly int _attribNorm = 1;
-		private readonly int _attribUV = 2;
+		private readonly int _attribUV = 1;
+		private readonly int _attribNorm = 2;
 
 		private bool _disposed;
 
