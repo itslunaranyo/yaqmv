@@ -95,6 +95,8 @@ namespace yaqmv
 		{
 			base.OnRender(dc);
 
+			double w, h;
+
 			// background
 			SolidColorBrush brush = new SolidColorBrush(Color.FromRgb(96,96,96));
 			Pen pen = new Pen(Brushes.Black, 1);
@@ -124,7 +126,9 @@ namespace yaqmv
 			}
 
 			// final border
-			dc.DrawRectangle(null, pen, new Rect(0.5f, 0.5f, ActualWidth-1, ActualHeight-1));
+			w = Math.Max(2, ActualWidth - 1);
+			h = Math.Max(2, ActualHeight - 1);
+			dc.DrawRectangle(null, pen, new Rect(0.5f, 0.5f, w, h));
 		}
 	}
 }
