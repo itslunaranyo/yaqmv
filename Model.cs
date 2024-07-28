@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using OpenTK.Mathematics;
 using OpenTK.Graphics.OpenGL;
 using System.Xml.Linq;
+using System.Diagnostics.Eventing.Reader;
 
 namespace yaqmv
 {
@@ -21,6 +22,9 @@ namespace yaqmv
 		private readonly int _attribPos = 0;
 		private readonly int _attribUV = 1;
 		private readonly int _attribNorm = 2;
+
+		private bool _hasUVs = false;
+		private bool _hasNormals = false;
 
 		private bool _disposed;
 
@@ -47,6 +51,9 @@ namespace yaqmv
 				vbof[i++] = normals[j].Z;
 			}
 
+			_hasUVs = true;
+			_hasNormals = true;
+
 			Elements = indices.Length;
 			_vertexBufferObject = GL.GenBuffer();
 			_elementBufferObject = GL.GenBuffer();
@@ -61,13 +68,24 @@ namespace yaqmv
 		}
 		public void Bind(int pose = 0)
 		{
+			int offset = 0;
+			int stride = 3 * sizeof(float);
+
 			GL.BindVertexArray(_vertexArrayObject);
-			GL.VertexAttribPointer(_attribUV, 2, VertexAttribPointerType.Float, false, 2 * sizeof(float), 0);
-			GL.EnableVertexAttribArray(_attribUV);
-			GL.VertexAttribPointer(_attribPos, 3, VertexAttribPointerType.Float, false, 6 * sizeof(float), (_count * 2 + _count * pose * 6) * sizeof(float));
+			if (_hasUVs)
+			{
+				GL.VertexAttribPointer(_attribUV, 2, VertexAttribPointerType.Float, false, 2 * sizeof(float), 0);
+				GL.EnableVertexAttribArray(_attribUV);
+				offset += 2 * sizeof(float) * _count;
+			}
+			if (_hasNormals)
+			{
+				stride = 6 * sizeof(float);
+				GL.VertexAttribPointer(_attribNorm, 3, VertexAttribPointerType.Float, false, stride, offset + (_count * pose * 6 + 3) * sizeof(float));
+				GL.EnableVertexAttribArray(_attribNorm);
+			}
+			GL.VertexAttribPointer(_attribPos, 3, VertexAttribPointerType.Float, false, stride, offset + (_count * pose * 6) * sizeof(float));
 			GL.EnableVertexAttribArray(_attribPos);
-			GL.VertexAttribPointer(_attribNorm, 3, VertexAttribPointerType.Float, false, 6 * sizeof(float), (_count * 2 + _count * pose * 6 + 3) * sizeof(float));
-			GL.EnableVertexAttribArray(_attribNorm);
 		}
 		~Model()
 		{
