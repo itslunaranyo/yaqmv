@@ -20,6 +20,7 @@
     <None Remove="shaders\default_f.shader" />
     <None Remove="shaders\default_v.shader" />
     <None Remove="shaders\flat_f.shader" />
+    <None Remove="shaders\unlit_f.shader" />
   </ItemGroup>
 
   <ItemGroup>
@@ -31,6 +32,7 @@
     <Resource Include="shaders\shaded_f.shader" />
     <Resource Include="shaders\default_v.shader" />
     <Resource Include="shaders\flat_f.shader" />
+    <Resource Include="shaders\unlit_f.shader" />
   </ItemGroup>
 
   <ItemGroup>

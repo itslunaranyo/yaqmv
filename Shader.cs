@@ -18,12 +18,14 @@ namespace yaqmv
         private bool _disposed = false;
 
 		public static Shader? TexturedShaded;
+		public static Shader? Textured;
 		public static Shader? Flat;
 		public static Shader? WhiteShaded;
 		
 		public static void Init()
 		{
 			TexturedShaded = new Shader("shaders/default_v.shader", "shaders/default_f.shader");
+			Textured = new Shader("shaders/default_v.shader", "shaders/unlit_f.shader");
 			Flat = new Shader("shaders/default_v.shader", "shaders/flat_f.shader");
 			WhiteShaded = new Shader("shaders/default_v.shader", "shaders/shaded_f.shader");
 		}
