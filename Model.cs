@@ -54,6 +54,53 @@ namespace yaqmv
 			_hasUVs = true;
 			_hasNormals = true;
 
+			BuildModelBuffers(indices, vbof);
+		}
+
+		public Model(int[] indices, List<Vector2> uvs, List<Vector3> positions)
+		{
+			_count = uvs.Count;
+			int len = uvs.Count * 2 + positions.Count * 3;
+			float[] vbof = new float[len];
+			int i = 0;
+
+			// vao: uvs, then position and normal interleaved w/ multiple poses end to end
+			foreach (var uv in uvs)
+			{
+				vbof[i++] = uv.X;
+				vbof[i++] = uv.Y;
+			}
+			for (int j = 0; j < positions.Count; j++)
+			{
+				vbof[i++] = positions[j].X;
+				vbof[i++] = positions[j].Y;
+				vbof[i++] = positions[j].Z;
+			}
+
+			_hasUVs = true;
+
+			BuildModelBuffers(indices, vbof);
+		}
+
+		public Model(int[] indices, List<Vector3> positions)
+		{
+			int len = positions.Count * 3;
+			float[] vbof = new float[len];
+			int i = 0;
+
+			// vao: uvs, then position and normal interleaved w/ multiple poses end to end
+			for (int j = 0; j < positions.Count; j++)
+			{
+				vbof[i++] = positions[j].X;
+				vbof[i++] = positions[j].Y;
+				vbof[i++] = positions[j].Z;
+			}
+
+			BuildModelBuffers(indices, vbof);
+		}
+
+		public void BuildModelBuffers(int[] indices, float[] vbof)
+		{
 			Elements = indices.Length;
 			_vertexBufferObject = GL.GenBuffer();
 			_elementBufferObject = GL.GenBuffer();
@@ -63,9 +110,9 @@ namespace yaqmv
 			GL.BindBuffer(BufferTarget.ArrayBuffer, _vertexBufferObject);
 			GL.BindBuffer(BufferTarget.ElementArrayBuffer, _elementBufferObject);
 			GL.BufferData(BufferTarget.ArrayBuffer, vbof.Length * sizeof(float), vbof, BufferUsageHint.StaticDraw);
-			GL.BufferData(BufferTarget.ElementArrayBuffer, indices.Length * sizeof(uint), indices, BufferUsageHint.StaticDraw);
-
+			GL.BufferData(BufferTarget.ElementArrayBuffer, Elements * sizeof(uint), indices, BufferUsageHint.StaticDraw);
 		}
+
 		public void Bind(int pose = 0)
 		{
 			int offset = 0;
