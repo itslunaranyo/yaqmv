@@ -38,7 +38,7 @@
 				</Grid.RowDefinitions>
 				<local:ModelWindow Grid.Row="0"
 					x:Name="ModelWindow" 
-					Render="OnRender"					
+					Render="ModelWindow_OnRender"
 				/>
 				<Grid Grid.Row="1">
 					<Grid.ColumnDefinitions>
@@ -151,7 +151,11 @@
 					<RowDefinition Height="*" />
 					<RowDefinition Height="120" />
 				</Grid.RowDefinitions>
-
+				<local:SkinWindow Grid.Row="0"
+					x:Name="SkinWindow" 
+					Render="SkinWindow_OnRender"
+					MouseWheel="OnMouseWheel"
+				/>
 				<Grid Grid.Row="1">
 					<Grid.ColumnDefinitions>
 						<ColumnDefinition Width="145"/>

@@ -1,63 +1,51 @@
-﻿using OpenTK.Mathematics;
-using OpenTK.Graphics.OpenGL;
+﻿using OpenTK.Graphics.OpenGL;
 using OpenTK.Wpf;
-//using OpenTK.Windowing.Common;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Interop;
-using System.Security.Cryptography;
 using System.Windows.Input;
 
 namespace yaqmv
 {
-	public partial class ModelWindow : GLWpfControl
+	public partial class SkinWindow : GLWpfControl
 	{
-		private ModelRenderer? _modelRenderer;
-		public ModelWindow()
+		private SkinRenderer? _skinRenderer;
+		public SkinWindow()
 		{
 			Focusable = false;
 
 			MouseMove += new MouseEventHandler(OnMouseMove);
 			MouseDown += new MouseButtonEventHandler(OnMouseDown);
 		}
-
 		public void Init(GLWpfControlSettings settings)
 		{
 			Start(settings);
 
-
-			_modelRenderer = new ModelRenderer();
+			_skinRenderer = new SkinRenderer();
 		}
-
-		public void SetMode(int mode)
-		{
-			_modelRenderer.SetMode(mode);
-		}
-
 		internal void LoadModel(ModelAsset mdl)
 		{
-			_modelRenderer.DisplayModel(mdl);
-			Camera3D.Reset(mdl.CenterOfFrame(0), mdl.RadiusOfFrame(0));
+			_skinRenderer.DisplayModel(mdl);
+			Camera2D.Reset();
 		}
 
 		public void OnRender(ModelState _ms)
 		{
 			GL.ClearColor(0.2f, 0.2f, 0.2f, 1.0f);
 			GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
-			GL.Enable(EnableCap.DepthTest);
-			GL.Enable(EnableCap.CullFace);
-			GL.CullFace(CullFaceMode.Front);
+			GL.Disable(EnableCap.DepthTest);
+			GL.Disable(EnableCap.CullFace);
 
-			_modelRenderer.Render(_ms, (float)ActualWidth, (float)ActualHeight);
+			_skinRenderer.Render(_ms, (float)ActualWidth, (float)ActualHeight);
 		}
 		public void OnUnload(object sender, RoutedEventArgs e)
 		{
-			_modelRenderer.Dispose();
+			_skinRenderer.Dispose();
 		}
+
 
 		private System.Windows.Point _mousePos;
 		private bool _buttonDownLeft;
@@ -68,8 +56,8 @@ namespace yaqmv
 		{
 			if (e.ButtonState == MouseButtonState.Pressed)
 			{
-				if (e.ChangedButton == MouseButton.Left)   _buttonDownLeft = true;
-				if (e.ChangedButton == MouseButton.Right)  _buttonDownRight = true;
+				if (e.ChangedButton == MouseButton.Left) _buttonDownLeft = true;
+				if (e.ChangedButton == MouseButton.Right) _buttonDownRight = true;
 				if (e.ChangedButton == MouseButton.Middle) _buttonDownMiddle = true;
 			}
 		}
@@ -79,11 +67,11 @@ namespace yaqmv
 			var delta = newPos - _mousePos;
 
 			if (_buttonDownLeft)
-				Camera3D.Orbit((float)delta.X, (float)delta.Y);
+				Camera2D.Pan((float)delta.X, (float)delta.Y);
 			else if (_buttonDownRight)
-				Camera3D.Dolly(-(float)delta.Y);
+				Camera2D.Pan((float)delta.X, (float)delta.Y);
 			else if (_buttonDownMiddle)
-				Camera3D.Pan((float)delta.X, (float)delta.Y);
+				Camera2D.Pan((float)delta.X, (float)delta.Y);
 
 			if (Mouse.LeftButton != MouseButtonState.Pressed)
 				_buttonDownLeft = false;
@@ -93,6 +81,15 @@ namespace yaqmv
 				_buttonDownMiddle = false;
 
 			_mousePos = newPos;
+			e.Handled = true;
+		}
+
+		protected override void OnMouseWheel(MouseWheelEventArgs e)
+		{
+			if (e.Delta < 0)
+				Camera2D.ZoomOut();
+			else
+				Camera2D.ZoomIn();
 			e.Handled = true;
 		}
 	}

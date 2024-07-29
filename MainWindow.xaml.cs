@@ -13,7 +13,6 @@ using System.Drawing;
 using Microsoft.Win32;
 using System.ComponentModel;
 using System.Windows.Threading;
-//using OpenTK.Windowing.Common;
 using OpenTK.Wpf;
 
 namespace yaqmv
@@ -24,6 +23,7 @@ namespace yaqmv
 	public partial class MainWindow : Window, INotifyPropertyChanged
 	{
 		internal ModelWindow _modelWindow;
+		internal SkinWindow _skinWindow;
 		internal ModelAsset _loadedAsset;
 		internal ModelState _modelState;
 		private DispatcherTimer _time;
@@ -47,6 +47,8 @@ namespace yaqmv
 
 			GlobalGLWPFSettings.SharedContext = (OpenTK.Windowing.Desktop.IGLFWGraphicsContext?)_modelWindow.Context;
 
+			_skinWindow = (SkinWindow)FindName("SkinWindow");
+			_skinWindow.Init(GlobalGLWPFSettings);
 
 			Shader.Init();
 
@@ -71,7 +73,8 @@ namespace yaqmv
 		//private void OnSizeChanged(object sender, SizeChangedEventArgs e) { _modelWindow.OnSizeChanged(sender, e); }
 
 		static double skinTime = 0;
-		private void OnRender(TimeSpan delta)
+
+		private void ModelWindow_OnRender(TimeSpan delta)
 		{
 			int i;
 
@@ -97,13 +100,20 @@ namespace yaqmv
 					_modelState.Skinframe = i;
 				}
 			}
-			_modelWindow.OnRender(delta, _modelState);
+			
+			_modelWindow.OnRender(_modelState);
 		}
-
+		
+		private void SkinWindow_OnRender(TimeSpan delta)
+		{
+			_skinWindow.OnRender(_modelState);
+		}
+		
 		internal void Display(ModelAsset mdl)
 		{
 			_modelState = new ModelState();
 			_modelWindow.LoadModel(mdl);
+			_skinWindow.LoadModel(mdl);
 			Playing = false;
 			SelectAnim(0);
 			AnimSelect.ItemsSource = _loadedAsset.AnimNames;
