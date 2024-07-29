@@ -14,12 +14,6 @@ namespace yaqmv
 {
 	internal class Texture
 	{
-		public void GLWhatsWrong()
-		{
-			var e = GL.GetError();
-			if (e != ErrorCode.NoError)
-				Debug.WriteLine(e);
-		}
 
 		private int _handle { get; }
 
