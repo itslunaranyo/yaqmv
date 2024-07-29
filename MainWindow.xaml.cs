@@ -196,10 +196,14 @@ namespace yaqmv
 		}
 
 		public string StatsText { get { 
-			return "Vertices: " + _loadedAsset.VertexCount.ToString() +
-				"\nTriangles: " + _loadedAsset.TriangleCount.ToString() +
-				"\nFrames: " + _loadedAsset.FrameCount.ToString() +
-				"\nSkins: " + _loadedAsset.SkinCount.ToString();
+			//return "Vertices: " + _loadedAsset.VertexCount.ToString() +
+			//	"\nTriangles: " + _loadedAsset.TriangleCount.ToString() +
+			//	"\nFrames: " + _loadedAsset.FrameCount.ToString() +
+			//	"\nSkins: " + _loadedAsset.SkinCount.ToString();
+			return _loadedAsset.VertexCount.ToString() +
+				"\n" + _loadedAsset.TriangleCount.ToString() +
+				"\n" + _loadedAsset.FrameCount.ToString() +
+				"\n" + _loadedAsset.SkinCount.ToString();
 			}
 		}
 		public string AnimStatsText { get {
@@ -207,8 +211,8 @@ namespace yaqmv
 			return "Frames: " + (TimelineMax - TimelineMin + 1).ToString() +
 				" (" + TimelineMin.ToString() +
 				"-" + TimelineMax.ToString() + 
-				")\nCurrent: " + _loadedAsset.frames[ftime].name +
-				" (" + ftime.ToString() + ")";
+				")\nCurrent: " + ftime.ToString() +
+				" (" + _loadedAsset.frames[ftime].name + ")";
 			}
 		}
 
