@@ -25,7 +25,7 @@ namespace yaqmv
 		public static void Init()
 		{
 			TexturedShaded = new Shader("shaders/default_v.shader", "shaders/default_f.shader");
-			Textured = new Shader("shaders/default_v.shader", "shaders/unlit_f.shader");
+			Textured = new Shader("shaders/unlit_v.shader", "shaders/unlit_f.shader");
 			Flat = new Shader("shaders/default_v.shader", "shaders/flat_f.shader");
 			WhiteShaded = new Shader("shaders/default_v.shader", "shaders/shaded_f.shader");
 		}
