@@ -29,10 +29,9 @@ namespace yaqmv
 		}
 		internal void DisplayModel(ModelAsset mdl)
 		{
-			int i, s, t;
 			_currentAsset = mdl;
 			_currentModel?.Dispose();
-			_currentModel = ModelConvertor.Convert(mdl);
+			_currentModel = ModelConvertor.ConvertAnimatedMesh(mdl);
 		}
 
 		public void SetMode(int mode)

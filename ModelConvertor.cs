@@ -11,7 +11,7 @@ namespace yaqmv
 {
 	internal static partial class ModelConvertor
 	{
-		public static Model Convert(ModelAsset asset)
+		public static Model ConvertAnimatedMesh(ModelAsset asset)
 		{
 			var backfacemap = new Dictionary<int, int>();   // remember what vertex index corresponds to what offseam UV index
 			var UVList = new List<Vector2>();  // flat list of UV coordinates
