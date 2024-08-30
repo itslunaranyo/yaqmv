@@ -14,7 +14,7 @@ namespace yaqmv
 	internal class Model : IDisposable
 	{
 		private int _vertexBufferObject;
-		private int _vertexArrayObject;
+		private int[] _vertexArrayObjects;
 		private int _elementBufferObject;
 		private int _count;
 		public int Elements;
@@ -34,6 +34,7 @@ namespace yaqmv
 			int len = uvs.Count * 2 + positions.Count * 3 + normals.Count * 3;
 			float[] vbof = new float[len];
 			int i = 0;
+			_vertexArrayObjects = new int[framecount];
 
 			// vao: uvs, then position and normal interleaved w/ multiple poses end to end
 			foreach (var uv in uvs)
@@ -54,7 +55,7 @@ namespace yaqmv
 			_hasUVs = true;
 			_hasNormals = true;
 
-			BuildModelBuffers(indices, vbof);
+			BuildModelBuffers(indices, vbof, framecount);
 		}
 
 		public Model(int[] indices, List<Vector2> uvs, List<Vector3> positions)
@@ -63,6 +64,7 @@ namespace yaqmv
 			int len = uvs.Count * 2 + positions.Count * 3;
 			float[] vbof = new float[len];
 			int i = 0;
+			_vertexArrayObjects = new int[1];
 
 			// vao: uvs, then position and normal interleaved w/ multiple poses end to end
 			foreach (var uv in uvs)
@@ -87,6 +89,7 @@ namespace yaqmv
 			int len = positions.Count * 3;
 			float[] vbof = new float[len];
 			int i = 0;
+			_vertexArrayObjects = new int[1];
 
 			// vao: uvs, then position and normal interleaved w/ multiple poses end to end
 			for (int j = 0; j < positions.Count; j++)
@@ -99,40 +102,53 @@ namespace yaqmv
 			BuildModelBuffers(indices, vbof);
 		}
 
-		public void BuildModelBuffers(int[] indices, float[] vbof)
+		public void BuildModelBuffers(int[] indices, float[] vbof, int framecount = 1)
 		{
 			Elements = indices.Length;
 			_vertexBufferObject = GL.GenBuffer();
 			_elementBufferObject = GL.GenBuffer();
-			_vertexArrayObject = GL.GenVertexArray();
+			GL.GenVertexArrays(framecount, _vertexArrayObjects);
 
-			GL.BindVertexArray(_vertexArrayObject);
+			int offset = 0;
+			int stride = 3 * sizeof(float);
+
+			if (_hasUVs)
+				offset += 2 * sizeof(float) * _count;
+			if (_hasNormals)
+				stride = 6 * sizeof(float);
+
 			GL.BindBuffer(BufferTarget.ArrayBuffer, _vertexBufferObject);
 			GL.BindBuffer(BufferTarget.ElementArrayBuffer, _elementBufferObject);
 			GL.BufferData(BufferTarget.ArrayBuffer, vbof.Length * sizeof(float), vbof, BufferUsageHint.StaticDraw);
 			GL.BufferData(BufferTarget.ElementArrayBuffer, Elements * sizeof(uint), indices, BufferUsageHint.StaticDraw);
+
+			for (int i = 0; i < framecount; i++)
+			{
+				GL.BindVertexArray(_vertexArrayObjects[i]);
+				GL.BindBuffer(BufferTarget.ArrayBuffer, _vertexBufferObject);
+				GL.BindBuffer(BufferTarget.ElementArrayBuffer, _elementBufferObject);
+
+				if (_hasUVs)
+				{
+					GL.VertexAttribPointer(_attribUV, 2, VertexAttribPointerType.Float, false, 2 * sizeof(float), 0);
+					GL.EnableVertexAttribArray(_attribUV);
+				}
+				GL.VertexAttribPointer(_attribPos, 3, VertexAttribPointerType.Float, false, stride, offset + _count * i * stride);
+				GL.EnableVertexAttribArray(_attribPos);
+				if (_hasNormals)
+				{
+					GL.VertexAttribPointer(_attribNorm, 3, VertexAttribPointerType.Float, false, stride, offset + (_count * i * 6 + 3) * sizeof(float));
+					GL.EnableVertexAttribArray(_attribNorm);
+				}
+			}
+			GL.BindVertexArray(0);
+			GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
+			GL.BindBuffer(BufferTarget.ElementArrayBuffer, 0);
 		}
 
 		public void Bind(int pose = 0)
 		{
-			int offset = 0;
-			int stride = 3 * sizeof(float);
-
-			GL.BindVertexArray(_vertexArrayObject);
-			if (_hasUVs)
-			{
-				GL.VertexAttribPointer(_attribUV, 2, VertexAttribPointerType.Float, false, 2 * sizeof(float), 0);
-				GL.EnableVertexAttribArray(_attribUV);
-				offset += 2 * sizeof(float) * _count;
-			}
-			if (_hasNormals)
-			{
-				stride = 6 * sizeof(float);
-				GL.VertexAttribPointer(_attribNorm, 3, VertexAttribPointerType.Float, false, stride, offset + (_count * pose * 6 + 3) * sizeof(float));
-				GL.EnableVertexAttribArray(_attribNorm);
-			}
-			GL.VertexAttribPointer(_attribPos, 3, VertexAttribPointerType.Float, false, stride, offset + (_count * pose * 6) * sizeof(float));
-			GL.EnableVertexAttribArray(_attribPos);
+			GL.BindVertexArray(_vertexArrayObjects[pose]);
 		}
 		~Model()
 		{
@@ -146,7 +162,7 @@ namespace yaqmv
 			if (_disposed) return;
 			GL.DeleteBuffers(1, ref _vertexBufferObject);
 			GL.DeleteBuffers(1, ref _elementBufferObject);
-			GL.DeleteVertexArrays(1, ref _vertexArrayObject);
+			GL.DeleteVertexArrays(1, _vertexArrayObjects);
 			_disposed = true;
 		}
 	}

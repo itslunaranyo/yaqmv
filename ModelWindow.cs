@@ -28,35 +28,28 @@ namespace yaqmv
 		public void Init(GLWpfControlSettings settings)
 		{
 			Start(settings);
-
-
 			_modelRenderer = new ModelRenderer();
 		}
 
 		public void SetMode(int mode)
 		{
-			_modelRenderer.SetMode(mode);
+			_modelRenderer?.SetMode(mode);
 		}
 
 		internal void LoadModel(ModelAsset mdl)
 		{
-			_modelRenderer.DisplayModel(mdl);
+			Context.MakeCurrent();
+			_modelRenderer?.DisplayModel(mdl);
 			Camera3D.Reset(mdl.CenterOfFrame(0), mdl.RadiusOfFrame(0));
 		}
 
 		public void OnRender(ModelState _ms)
 		{
-			GL.ClearColor(0.2f, 0.2f, 0.2f, 1.0f);
-			GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
-			GL.Enable(EnableCap.DepthTest);
-			GL.Enable(EnableCap.CullFace);
-			GL.CullFace(CullFaceMode.Front);
-
-			_modelRenderer.Render(_ms, (float)ActualWidth, (float)ActualHeight);
+			_modelRenderer?.Render(_ms, (float)ActualWidth, (float)ActualHeight);
 		}
 		public void OnUnload(object sender, RoutedEventArgs e)
 		{
-			_modelRenderer.Dispose();
+			_modelRenderer?.Dispose();
 		}
 
 		private System.Windows.Point _mousePos;

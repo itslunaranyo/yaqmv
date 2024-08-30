@@ -44,7 +44,7 @@ namespace yaqmv
 			};
 			_modelWindow = (ModelWindow)FindName("ModelWindow");
 			_modelWindow.Init(GlobalGLWPFSettings);
-
+			
 			GlobalGLWPFSettings.SharedContext = (OpenTK.Windowing.Desktop.IGLFWGraphicsContext?)_modelWindow.Context;
 
 			_skinWindow = (SkinWindow)FindName("SkinWindow");
@@ -112,8 +112,10 @@ namespace yaqmv
 		internal void Display(ModelAsset mdl)
 		{
 			_modelState = new ModelState();
+
 			_modelWindow.LoadModel(mdl);
 			_skinWindow.LoadModel(mdl);
+
 			Playing = false;
 			SelectAnim(0);
 			AnimSelect.ItemsSource = _loadedAsset.AnimNames;

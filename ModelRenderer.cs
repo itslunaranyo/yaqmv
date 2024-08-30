@@ -44,6 +44,12 @@ namespace yaqmv
 			if (_currentModel == null)
 				return;
 
+			GL.ClearColor(0.2f, 0.2f, 0.2f, 1.0f);
+			GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
+			GL.Enable(EnableCap.DepthTest);
+			GL.Enable(EnableCap.CullFace);
+			GL.CullFace(CullFaceMode.Front);
+
 			float asp = w / h;
 			float vfov = MathHelper.DegreesToRadians(60f);
 
@@ -150,6 +156,7 @@ namespace yaqmv
 
 				GL.DrawElements(PrimitiveType.Triangles, _currentModel.Elements, DrawElementsType.UnsignedInt, 0);
 			}
+			GL.BindVertexArray(0);
 		}
 		public void Dispose()
 		{

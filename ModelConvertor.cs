@@ -11,14 +11,12 @@ namespace yaqmv
 {
 	internal static partial class ModelConvertor
 	{
-		public static Model ConvertAnimatedMesh(ModelAsset asset)
+		public static void BuildComponentList(ModelAsset asset, ref List<Vector2> UVList, ref Dictionary<int, int> backfaceMap, ref int[] indices)
 		{
-			var backfacemap = new Dictionary<int, int>();   // remember what vertex index corresponds to what offseam UV index
-			var UVList = new List<Vector2>();  // flat list of UV coordinates
 			var UVList2 = new List<Vector2>();  // onseam offsets to add at the end of the UV list
-
 			int i;
 			int j = asset.VertexCount;
+
 			Vector2 n;
 			for (i = 0; i < asset.VertexCount; i++)
 			{
@@ -30,35 +28,61 @@ namespace yaqmv
 					n.X = (asset.verts[i].position.X + 0.5f) / asset.SkinWidth + 0.5f;
 					n.Y = (asset.verts[i].position.Y + 0.5f) / asset.SkinHeight;
 					UVList2.Add(n);
-					backfacemap[i] = j++;
+					backfaceMap[i] = j++;
 				}
 				else
-					backfacemap[i] = i;
+					backfaceMap[i] = i;
 			}
 			UVList.AddRange(UVList2);
-			
-			int[] indices = new int[asset.TriangleCount * 3];
-			j = 0;
-			foreach(var tri in asset.tris)
+
+			i = 0;
+			foreach (var tri in asset.tris)
 			{
 				if (tri.frontface)
 				{
-					indices[j++] = tri.indices.Item1;
-					indices[j++] = tri.indices.Item2;
-					indices[j++] = tri.indices.Item3;
+					indices[i++] = tri.indices.Item1;
+					indices[i++] = tri.indices.Item2;
+					indices[i++] = tri.indices.Item3;
 				}
 				else
 				{
-					indices[j++] = backfacemap[tri.indices.Item1];
-					indices[j++] = backfacemap[tri.indices.Item2];
-					indices[j++] = backfacemap[tri.indices.Item3];
+					indices[i++] = backfaceMap[tri.indices.Item1];
+					indices[i++] = backfaceMap[tri.indices.Item2];
+					indices[i++] = backfaceMap[tri.indices.Item3];
 				}
 			}
-			Debug.Assert(asset.TriangleCount * 3 == j);
+		}
+
+		public static Model ConvertSkinMesh(ModelAsset asset)
+		{
+			var backfaceMap = new Dictionary<int, int>();   // remember what vertex index corresponds to what offseam UV index
+			var UVList = new List<Vector2>();  // flat list of UV coordinates
+			int[] indices = new int[asset.TriangleCount * 3];
+			int i;
+
+			BuildComponentList(asset, ref UVList, ref backfaceMap, ref indices);
+
+			var positions = new List<Vector3>();
+
+			for (i = 0; i < UVList.Count; i++)
+			{
+				positions.Add(new Vector3(UVList[i].X, UVList[i].Y, 0));
+			}
+			return new Model(indices, positions);
+		}
+
+		public static Model ConvertAnimatedMesh(ModelAsset asset)
+		{
+			var backfaceMap = new Dictionary<int, int>();   // remember what vertex index corresponds to what offseam UV index
+			var UVList = new List<Vector2>();  // flat list of UV coordinates
+			int[] indices = new int[asset.TriangleCount * 3];
+			int i;
+
+			BuildComponentList(asset, ref UVList, ref backfaceMap, ref indices);
+
 			var positions = new List<Vector3>();
 			var normals = new List<Vector3>();
 
-			j = 0;
 			foreach (var frame in asset.frames)
 			{
 				var poslist = new List<Vector3>(Enumerable.Repeat(new Vector3(), UVList.Count));
@@ -67,10 +91,10 @@ namespace yaqmv
 				{
 					poslist[i] = frame.positions[i].UncompressedOrigin(asset);
 					normlist[i] = _normalTable[frame.positions[i].normalCompressed];
-					if (backfacemap[i] != i)
+					if (backfaceMap[i] != i)
 					{
-						poslist[backfacemap[i]] = poslist[i];
-						normlist[backfacemap[i]] = normlist[i];
+						poslist[backfaceMap[i]] = poslist[i];
+						normlist[backfaceMap[i]] = normlist[i];
 					}
 				}
 				positions.AddRange(poslist);

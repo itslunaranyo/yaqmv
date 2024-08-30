@@ -12,7 +12,7 @@ namespace yaqmv
 {
 	internal class SkinRenderer : IDisposable
 	{
-		private Model _quadModel;
+		private Model? _quadModel;
 		private Model? _currentModel;
 		private ModelAsset? _currentAsset;
 		private bool _disposed;
@@ -20,6 +20,18 @@ namespace yaqmv
 		internal SkinRenderer()
 		{
 			_disposed = false;
+			MakeTheQuadModelNow();
+		}
+		internal void DisplayModel(ModelAsset mdl)
+		{
+			_currentAsset = mdl;
+			_currentModel?.Dispose();
+			_currentModel = ModelConvertor.ConvertSkinMesh(mdl);
+			Utility.GLWhatsWrong("skinrenderer.displaymodel");
+		}
+		internal void MakeTheQuadModelNow()
+		{
+			if (_quadModel != null) return;
 
 			int[] quadindices = {
 				0, 1, 2,
@@ -39,19 +51,17 @@ namespace yaqmv
 				new Vector2(1f, 1f),
 			};
 			_quadModel = new Model(quadindices, quaduvs, quadverts);
-		}
-		internal void DisplayModel(ModelAsset mdl)
-		{
-			_currentAsset = mdl;
-			_currentModel?.Dispose();
-			_currentModel = ModelConvertor.ConvertAnimatedMesh(mdl);
-			Utility.GLWhatsWrong("skinrenderer.displaymodel");
-		}
+	}
 
-		internal void Render(ModelState ms, float w, float h)
+	internal void Render(ModelState ms, float w, float h)
 		{
-			if (_currentModel == null)
+			if (_currentAsset == null)
 				return;
+
+			GL.ClearColor(0.2f, 0.2f, 0.2f, 1.0f);
+			GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
+			GL.Disable(EnableCap.DepthTest);
+			GL.Disable(EnableCap.CullFace);
 
 			float asp = w / h;
 			float vfov = MathHelper.DegreesToRadians(60f);
@@ -61,20 +71,32 @@ namespace yaqmv
 			Matrix4 matmodel = Matrix4.CreateScale(_currentAsset.SkinWidth, _currentAsset.SkinHeight, 1);
 
 			GL.Viewport(0, 0, (int)w, (int)h);
-			_quadModel.Bind();
-			Utility.GLWhatsWrong("skinrenderer.render modelbind");
 
+			_quadModel.Bind();
 			GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Fill);
 			_currentAsset?.skins[ms.Skin].images[ms.Skinframe].Tex.Bind();
 			Shader.Textured.Use();
 			Shader.Textured.SetUniform("model", matmodel);
 			Shader.Textured.SetUniform("view", matview);
 			Shader.Textured.SetUniform("projection", matpersp);
-
+			
 			GL.DrawElements(PrimitiveType.Triangles, _quadModel.Elements, DrawElementsType.UnsignedInt, 0);
+			GL.BindVertexArray(0);
 
-			Utility.GLWhatsWrong("end of skinrenderer.render");
+			matmodel = Matrix4.CreateTranslation(-0.5f, -0.5f, 0) * Matrix4.CreateScale(-_currentAsset.SkinWidth, -_currentAsset.SkinHeight, 1);
+			_currentModel.Bind();
+			Shader.Flat.Use();
+			Shader.Flat.SetUniform("model", matmodel);
+			Shader.Flat.SetUniform("view", matview);
+			Shader.Flat.SetUniform("projection", matpersp);
+			Shader.Flat.SetUniform("color", new Vector3(0.9f, 0.9f, 0.9f));
+
+			GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Line);
+			GL.DrawElements(PrimitiveType.Triangles, _currentModel.Elements, DrawElementsType.UnsignedInt, 0);
+			GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Fill);
+			GL.BindVertexArray(0);
 		}
+
 		public void Dispose()
 		{
 			if (_disposed) return;

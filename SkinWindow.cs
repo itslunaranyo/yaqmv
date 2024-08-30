@@ -28,17 +28,14 @@ namespace yaqmv
 		}
 		internal void LoadModel(ModelAsset mdl)
 		{
+			Context.MakeCurrent();
 			_skinRenderer.DisplayModel(mdl);
+			_skinRenderer.MakeTheQuadModelNow();
 			Camera2D.Reset();
 		}
 
 		public void OnRender(ModelState _ms)
 		{
-			GL.ClearColor(0.2f, 0.2f, 0.2f, 1.0f);
-			GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
-			GL.Disable(EnableCap.DepthTest);
-			GL.Disable(EnableCap.CullFace);
-
 			_skinRenderer.Render(_ms, (float)ActualWidth, (float)ActualHeight);
 		}
 		public void OnUnload(object sender, RoutedEventArgs e)
