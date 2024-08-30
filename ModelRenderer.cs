@@ -41,11 +41,12 @@ namespace yaqmv
 
 		internal void Render(ModelState ms, float w, float h)
 		{
+			GL.ClearColor(0.2f, 0.2f, 0.2f, 1.0f);
+			GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
+
 			if (_currentModel == null)
 				return;
 
-			GL.ClearColor(0.2f, 0.2f, 0.2f, 1.0f);
-			GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 			GL.Enable(EnableCap.DepthTest);
 			GL.Enable(EnableCap.CullFace);
 			GL.CullFace(CullFaceMode.Front);
