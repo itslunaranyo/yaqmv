@@ -21,6 +21,7 @@ namespace yaqmv
 		internal Anim[] anims;
 		internal ObservableCollection<string> AnimNames = [];
 		internal ObservableCollection<string> SkinNames = [];
+		internal List<ObservableCollection<string>> SkinFrameNames = [];
 
 		internal int SkinCount { get { return header.skincount; } }
 		internal int SkinWidth { get { return header.skinwidth; } }
@@ -129,10 +130,19 @@ namespace yaqmv
 					AnimNames.Add(anim.name);
 
 				SkinNames.Clear();
+				SkinFrameNames.Clear();
 				i = 0;
 				foreach (var skin in skins)
-					SkinNames.Add("Skin " + (i++).ToString());
-
+				{
+					SkinNames.Add("Skin " + i.ToString());
+					SkinFrameNames.Add([]);
+					int j = 0;
+					if (skin.images.Length == 1)
+						SkinFrameNames[i].Add("");
+					else foreach (var img in skin.images)
+						SkinFrameNames[i].Add("Frame " + (j++).ToString());
+					i++;
+				}
 				Debug.Assert(mdlfile.BaseStream.Position == mdlfile.BaseStream.Length, "didn't read the entire file for some reason");
 			}
 		}

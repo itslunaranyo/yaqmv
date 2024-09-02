@@ -184,7 +184,7 @@
 							<ComboBox x:Name="SkinFrameSelect" 
 								Width="80" 
 								IsReadOnly="True"
-								SelectionChanged="SkinSelect_SelectionChanged" IsEnabled="False"/>
+								SelectionChanged="SkinFrameSelect_SelectionChanged" IsEnabled="False"/>
 							<Button Content="+" Width="20" Margin="6 0"/>
 							<Button Content="-" Width="20"/>
 						</WrapPanel>

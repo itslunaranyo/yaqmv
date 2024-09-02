@@ -35,9 +35,9 @@ namespace yaqmv
 			Camera2D.Reset();
 		}
 
-		public void OnRender(ModelState _ms)
+		public void OnRender(SkinState _ss)
 		{
-			_skinRenderer.Render(_ms, (float)ActualWidth, (float)ActualHeight);
+			_skinRenderer.Render(_ss, (float)ActualWidth, (float)ActualHeight);
 		}
 		public void OnUnload(object sender, RoutedEventArgs e)
 		{

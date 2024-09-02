@@ -65,7 +65,7 @@ namespace yaqmv
 			else
 				_rmode = RenderMode.Textured;
 		}
-		internal void Render(ModelState ms, float w, float h)
+		internal void Render(SkinState ss, float w, float h)
 		{
 			GL.ClearColor(0.2f, 0.2f, 0.2f, 1.0f);
 			GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
@@ -89,7 +89,7 @@ namespace yaqmv
 			GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Fill);
 			if (_rmode == RenderMode.Textured || _rmode == RenderMode.TexturedWire)
 			{
-				_currentAsset?.skins[ms.Skin].images[ms.Skinframe].Tex.Bind();
+				_currentAsset?.skins[ss.Skin].images[ss.Skinframe].Tex.Bind();
 				Shader.Textured.Use();
 				Shader.Textured.SetUniform("model", matmodel);
 				Shader.Textured.SetUniform("view", matview);

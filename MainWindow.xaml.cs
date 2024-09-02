@@ -26,6 +26,7 @@ namespace yaqmv
 		internal SkinWindow _skinWindow;
 		internal ModelAsset _loadedAsset;
 		internal ModelState _modelState;
+		internal SkinState _skinState;
 		private DispatcherTimer _time;
 
 		public GLWpfControlSettings GlobalGLWPFSettings { get; private set; }
@@ -108,7 +109,7 @@ namespace yaqmv
 		
 		private void SkinWindow_OnRender(TimeSpan delta)
 		{
-			_skinWindow.OnRender(_modelState);
+			_skinWindow.OnRender(_skinState);
 		}
 		
 		internal void Display(ModelAsset mdl)
@@ -122,8 +123,13 @@ namespace yaqmv
 			SelectAnim(0);
 			AnimSelect.ItemsSource = _loadedAsset.AnimNames;
 			AnimSelect.SelectedIndex = 0;
+
 			SkinSelect.ItemsSource = _loadedAsset.SkinNames;
 			SkinSelect.SelectedIndex = 0;
+			SkinFrameSelect.ItemsSource = _loadedAsset.SkinFrameNames[0];
+			SkinFrameSelect.SelectedIndex = 0;
+			SetSkinFrameSelectStatus();
+
 			NotifyPropertyChanged("StatsText");
 			NotifyPropertyChanged("SkinText");
 		}
@@ -141,9 +147,14 @@ namespace yaqmv
 		public int SelectedSkin
 		{
 			get { return _modelState.Skin; }
-			set { _modelState.Skin = value; }
+			set { _modelState.Skin = value; _skinState.Skin = value; }
 		}
 
+		public int SelectedSkinFrame
+		{
+			get { return _skinState.Skinframe; }
+			set { _skinState.Skinframe = value; }
+		}
 
 		private void Anim_Tick(object sender, EventArgs e)
 		{
@@ -336,6 +347,20 @@ namespace yaqmv
 		private void SkinSelect_SelectionChanged(object sender, SelectionChangedEventArgs e)
 		{
 			SelectedSkin = SkinSelect.SelectedIndex == -1 ? 0 : SkinSelect.SelectedIndex;
+			SetSkinFrameSelectStatus();
+		}
+		private void SetSkinFrameSelectStatus()
+		{
+			SkinFrameSelect.IsEnabled = (_loadedAsset.skins[SelectedSkin].images.Length > 1);
+			if (SkinFrameSelect.IsEnabled)
+			{
+				SkinFrameSelect.ItemsSource = _loadedAsset.SkinFrameNames[0];
+				SkinFrameSelect.SelectedIndex = 0;
+			}
+		}
+		private void SkinFrameSelect_SelectionChanged(object sender, SelectionChangedEventArgs e)
+		{
+			SelectedSkinFrame = SkinFrameSelect.SelectedIndex == -1 ? 0 : SkinFrameSelect.SelectedIndex;
 		}
 
 		private void Timeline_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
