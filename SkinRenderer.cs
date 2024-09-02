@@ -15,6 +15,9 @@ namespace yaqmv
 		private Model? _quadModel;
 		private Model? _currentModel;
 		private ModelAsset? _currentAsset;
+		private enum RenderMode { Textured, Wire, TexturedWire };
+		private RenderMode _rmode;
+
 		private bool _disposed;
 		
 		internal SkinRenderer()
@@ -53,7 +56,16 @@ namespace yaqmv
 			_quadModel = new Model(quadindices, quaduvs, quadverts);
 	}
 
-	internal void Render(ModelState ms, float w, float h)
+		public void SetMode(bool skin, bool wire)
+		{
+			if (skin && wire)
+				_rmode = RenderMode.TexturedWire;
+			else if (wire)
+				_rmode = RenderMode.Wire;
+			else
+				_rmode = RenderMode.Textured;
+		}
+		internal void Render(ModelState ms, float w, float h)
 		{
 			GL.ClearColor(0.2f, 0.2f, 0.2f, 1.0f);
 			GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
@@ -75,27 +87,40 @@ namespace yaqmv
 
 			_quadModel.Bind();
 			GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Fill);
-			_currentAsset?.skins[ms.Skin].images[ms.Skinframe].Tex.Bind();
-			Shader.Textured.Use();
-			Shader.Textured.SetUniform("model", matmodel);
-			Shader.Textured.SetUniform("view", matview);
-			Shader.Textured.SetUniform("projection", matpersp);
-			
+			if (_rmode == RenderMode.Textured || _rmode == RenderMode.TexturedWire)
+			{
+				_currentAsset?.skins[ms.Skin].images[ms.Skinframe].Tex.Bind();
+				Shader.Textured.Use();
+				Shader.Textured.SetUniform("model", matmodel);
+				Shader.Textured.SetUniform("view", matview);
+				Shader.Textured.SetUniform("projection", matpersp);
+			}
+			else
+			{
+				Shader.Flat.Use();
+				Shader.Flat.SetUniform("model", matmodel);
+				Shader.Flat.SetUniform("view", matview);
+				Shader.Flat.SetUniform("projection", matpersp);
+				Shader.Flat.SetUniform("color", Vector3.Zero);
+			}
 			GL.DrawElements(PrimitiveType.Triangles, _quadModel.Elements, DrawElementsType.UnsignedInt, 0);
 			GL.BindVertexArray(0);
 
-			matmodel = Matrix4.CreateTranslation(-0.5f, -0.5f, 0) * Matrix4.CreateScale(-_currentAsset.SkinWidth, -_currentAsset.SkinHeight, 1);
-			_currentModel.Bind();
-			Shader.Flat.Use();
-			Shader.Flat.SetUniform("model", matmodel);
-			Shader.Flat.SetUniform("view", matview);
-			Shader.Flat.SetUniform("projection", matpersp);
-			Shader.Flat.SetUniform("color", new Vector3(0.9f, 0.9f, 0.9f));
+			if (_rmode == RenderMode.Wire || _rmode == RenderMode.TexturedWire)
+			{
+				matmodel = Matrix4.CreateTranslation(-0.5f, -0.5f, 0) * Matrix4.CreateScale(-_currentAsset.SkinWidth, -_currentAsset.SkinHeight, 1);
+				_currentModel.Bind();
+				Shader.Flat.Use();
+				Shader.Flat.SetUniform("model", matmodel);
+				Shader.Flat.SetUniform("view", matview);
+				Shader.Flat.SetUniform("projection", matpersp);
+				Shader.Flat.SetUniform("color", new Vector3(0.9f, 0.9f, 0.9f));
 
-			GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Line);
-			GL.DrawElements(PrimitiveType.Triangles, _currentModel.Elements, DrawElementsType.UnsignedInt, 0);
-			GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Fill);
-			GL.BindVertexArray(0);
+				GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Line);
+				GL.DrawElements(PrimitiveType.Triangles, _currentModel.Elements, DrawElementsType.UnsignedInt, 0);
+				GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Fill);
+				GL.BindVertexArray(0);
+			}
 		}
 
 		public void Dispose()

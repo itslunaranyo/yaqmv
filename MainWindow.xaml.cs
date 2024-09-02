@@ -40,7 +40,8 @@ namespace yaqmv
 			{
 				MajorVersion = 3,
 				MinorVersion = 3,
-				Profile = OpenTK.Windowing.Common.ContextProfile.Core
+				Profile = OpenTK.Windowing.Common.ContextProfile.Core,
+				Samples = 8,
 			};
 			_modelWindow = (ModelWindow)FindName("ModelWindow");
 			_modelWindow.Init(GlobalGLWPFSettings);
@@ -67,6 +68,7 @@ namespace yaqmv
 			NotifyPropertyChanged("StatsText");
 			NotifyPropertyChanged("AnimStatsText");
 			NotifyPropertyChanged("AnimStatsText");
+			NotifyPropertyChanged("SkinText");
 		}
 		private void Window_Unloaded(object sender, RoutedEventArgs e) { _modelWindow.OnUnload(sender, e); }
 
@@ -123,6 +125,7 @@ namespace yaqmv
 			SkinSelect.ItemsSource = _loadedAsset.SkinNames;
 			SkinSelect.SelectedIndex = 0;
 			NotifyPropertyChanged("StatsText");
+			NotifyPropertyChanged("SkinText");
 		}
 
 		private void SelectAnim(int a)
@@ -140,6 +143,8 @@ namespace yaqmv
 			get { return _modelState.Skin; }
 			set { _modelState.Skin = value; }
 		}
+
+
 		private void Anim_Tick(object sender, EventArgs e)
 		{
 			if (Timeline.Value == _loadedAsset.anims[_modelState.Anim].last)
@@ -217,6 +222,39 @@ namespace yaqmv
 				" (" + _loadedAsset.frames[ftime].name + ")";
 			}
 		}
+
+		public string SkinText
+		{
+			get
+			{
+				if (_loadedAsset.SkinWidth == 0 || _loadedAsset.SkinHeight == 0)
+					return "";
+
+				return _loadedAsset.SkinWidth.ToString() +
+					" x " +
+					_loadedAsset.SkinHeight.ToString();
+			}
+		}
+
+		private bool _UVShow = false;
+		private bool _UVOverlay = false;
+		public bool UVShow { 
+			get { return _UVShow; } 
+			set {
+				_UVShow = value;
+				_UVOverlay = false;
+				NotifyPropertyChanged("UVOverlay");
+				SkinWindow.SetMode((!_UVShow || _UVOverlay), (_UVShow || _UVOverlay));
+			}
+		}
+		public bool UVOverlay { 
+			get { return _UVOverlay; } 
+			set {
+				_UVOverlay = value;
+				_UVShow = false;
+				NotifyPropertyChanged("UVShow");
+				SkinWindow.SetMode((!_UVShow || _UVOverlay), (_UVShow || _UVOverlay));
+			} }
 
 
 		public event PropertyChangedEventHandler? PropertyChanged;
@@ -326,5 +364,12 @@ namespace yaqmv
 		{
 			_modelWindow?.SetMode(ModeSelect.SelectedIndex);
 		}
+
+		private void BSkinImport_Click(object sender, RoutedEventArgs e)
+		{ }
+		private void BSkinExport_Click(object sender, RoutedEventArgs e)
+		{ }
+		private void BUVExport_Click(object sender, RoutedEventArgs e)
+		{ }
 	}
 }

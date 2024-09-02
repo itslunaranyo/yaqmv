@@ -164,19 +164,46 @@
 				/>
 				<Grid Grid.Row="1">
 					<Grid.ColumnDefinitions>
-						<ColumnDefinition Width="145"/>
-						<ColumnDefinition/>
 						<ColumnDefinition Width="160"/>
+						<ColumnDefinition Width="120"/>
+						<ColumnDefinition/>
 					</Grid.ColumnDefinitions>
 					<StackPanel Margin="6" Grid.Column="0">
 						<WrapPanel>
-							<TextBlock Text="Skin:" />
+							<TextBlock Text="Skin: " />
+						</WrapPanel>
+						<WrapPanel Margin="0 2">
+							<ComboBox x:Name="SkinSelect" 
+								Width="80"
+								IsReadOnly="True"
+								SelectionChanged="SkinSelect_SelectionChanged"/>
+							<Button Content="+" Width="20" Margin="6 0"/>
+							<Button Content="-" Width="20"/>
+						</WrapPanel>
+						<WrapPanel Margin="0 2">
+							<ComboBox x:Name="SkinFrameSelect" 
+								Width="80" 
+								IsReadOnly="True"
+								SelectionChanged="SkinSelect_SelectionChanged" IsEnabled="False"/>
+							<Button Content="+" Width="20" Margin="6 0"/>
+							<Button Content="-" Width="20"/>
+						</WrapPanel>
+						<WrapPanel Margin="0 2">
+							<Button Content="Import..." Margin="0 0 4 0" Padding="4 0" Click="BSkinImport_Click"/>
+							<Button Content="Export..." Margin="4 0" Padding="4 0" Click="BSkinExport_Click"/>
 						</WrapPanel>
 						<WrapPanel>
-						<ComboBox x:Name="SkinSelect" 
-							Width="80" 
-							IsReadOnly="True"
-							SelectionChanged="SkinSelect_SelectionChanged"/>
+							<TextBlock Text="Size: " />
+							<TextBlock x:Name="SkStats" Text="{Binding SkinText}"/>
+						</WrapPanel>
+					</StackPanel>
+					<StackPanel Margin="6" Grid.Column="1">
+						<TextBlock Text="UV Map:" />
+						<CheckBox x:Name="UVShowCheck" Content="Show" Margin="0 2" IsChecked="{Binding UVShow}"/>
+						<CheckBox x:Name="UVOverlayCheck" Content="Overlay" IsChecked="{Binding UVOverlay}"/>
+						<CheckBox x:Name="UVAACheck" Content="Anti-Alias" Margin="0 2" IsChecked="{Binding UVAA}"/>
+						<WrapPanel>
+							<Button Content="Export..." Padding="4 0" Click="BUVExport_Click"/>
 						</WrapPanel>
 					</StackPanel>
 				</Grid>

@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
+using System.Windows.Interop;
 
 namespace yaqmv
 {
@@ -43,6 +44,10 @@ namespace yaqmv
 			_skinRenderer.Dispose();
 		}
 
+		public void SetMode(bool skin, bool wire)
+		{
+			_skinRenderer.SetMode(skin, wire);
+		}
 
 		private System.Windows.Point _mousePos;
 		private bool _buttonDownLeft;
