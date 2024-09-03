@@ -25,7 +25,7 @@
 		</Menu>
 		<Grid Grid.Row="1">
 			<Grid.ColumnDefinitions>
-				<ColumnDefinition Width="450" />
+				<ColumnDefinition Width="400" />
 				<ColumnDefinition Width="6" />
 				<ColumnDefinition Width="*" />
 			</Grid.ColumnDefinitions>
@@ -189,8 +189,8 @@
 							<Button Content="-" Width="20"/>
 						</WrapPanel>
 						<WrapPanel Margin="0 2">
-							<Button Content="Import..." Margin="0 0 4 0" Padding="4 0" Click="BSkinImport_Click"/>
-							<Button Content="Export..." Margin="4 0" Padding="4 0" Click="BSkinExport_Click"/>
+							<Button Content="Import..." Margin="0 0 4 0" Padding="4 0" Click="BSkinImport_Click" x:Name="BSkinImport" IsEnabled="False"/>
+							<Button Content="Export..." Margin="4 0" Padding="4 0" Click="BSkinExport_Click" x:Name="BSkinExport" IsEnabled="False"/>
 						</WrapPanel>
 						<WrapPanel>
 							<TextBlock Text="Size: " />
@@ -203,7 +203,7 @@
 						<CheckBox x:Name="UVOverlayCheck" Content="Overlay" IsChecked="{Binding UVOverlay}"/>
 						<CheckBox x:Name="UVAACheck" Content="Anti-Alias" Margin="0 2" IsChecked="{Binding UVAA}"/>
 						<WrapPanel>
-							<Button Content="Export..." Padding="4 0" Click="BUVExport_Click"/>
+							<Button Content="Export..." Padding="4 0" Click="BUVExport_Click" x:Name="BUVExport" IsEnabled="False"/>
 						</WrapPanel>
 					</StackPanel>
 				</Grid>
