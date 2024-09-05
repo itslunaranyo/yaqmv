@@ -29,6 +29,10 @@ namespace yaqmv
 		internal SkinState _skinState;
 		private DispatcherTimer _time;
 
+		public bool IsModelLoaded { get; private set; }
+		public bool IsSkinWindowVisible { get; private set; }
+		public bool IsFlagsWindowVisible { get; private set; }
+
 		public GLWpfControlSettings GlobalGLWPFSettings { get; private set; }
 
 		public MainWindow()
@@ -62,6 +66,7 @@ namespace yaqmv
 			_time.Start();
 
 			_loadedAsset = new ModelAsset();
+			IsModelLoaded = false;
 			Playing = false;
 		}
 		private void Window_Loaded(object sender, RoutedEventArgs e)
@@ -73,7 +78,12 @@ namespace yaqmv
 		}
 		private void Window_Unloaded(object sender, RoutedEventArgs e) { _modelWindow.OnUnload(sender, e); }
 
-		//private void OnSizeChanged(object sender, SizeChangedEventArgs e) { _modelWindow.OnSizeChanged(sender, e); }
+		private void OnSizeChanged(object sender, SizeChangedEventArgs e)
+		{
+			// change size of child grids correctly
+			double widthDiff = e.NewSize.Width - e.PreviousSize.Width;
+
+		}
 
 		static double skinTime = 0;
 
@@ -81,7 +91,7 @@ namespace yaqmv
 		{
 			int i;
 
-			if (_loadedAsset.skins.Length > 0)
+			if (IsModelLoaded && _loadedAsset.skins.Length > 0)
 			{
 				int skinLength;
 				skinLength = _loadedAsset.skins[_modelState.Skin].images.Length;
@@ -118,6 +128,11 @@ namespace yaqmv
 
 			_modelWindow.LoadModel(mdl);
 			_skinWindow.LoadModel(mdl);
+
+			IsModelLoaded = true;
+			BSkinImport.IsEnabled = true;
+			BSkinExport.IsEnabled = true;
+			BUVExport.IsEnabled = true;
 
 			Playing = false;
 			SelectAnim(0);
@@ -162,7 +177,6 @@ namespace yaqmv
 				Timeline.Value = _loadedAsset.anims[_modelState.Anim].first;
 			else
 				Timeline.Value += 1;
-
 		}
 
 		private void StepForward()
@@ -238,7 +252,7 @@ namespace yaqmv
 		{
 			get
 			{
-				if (_loadedAsset.SkinWidth == 0 || _loadedAsset.SkinHeight == 0)
+				if (!IsModelLoaded)
 					return "";
 
 				return _loadedAsset.SkinWidth.ToString() +
@@ -302,6 +316,7 @@ namespace yaqmv
 			if (e.Delta < 0) StepForward();
 			else StepBackward();
 		}
+
 		private void OnKeyDown(object sender, KeyEventArgs e)
 		{
 			if (e.Key == Key.F)
@@ -310,7 +325,12 @@ namespace yaqmv
 			}
 			if (e.Key == Key.K)
 			{
-				_modelState.Skin = (_modelState.Skin + 1) % _loadedAsset.SkinCount;
+				//_modelState.Skin = (_modelState.Skin + 1) % _loadedAsset.SkinCount;
+				ToggleSkinWindow();
+			}
+			if (e.Key == Key.G)
+			{
+				ToggleFlagsWindow();
 			}
 			if (e.Key == Key.OemPeriod)
 			{
@@ -391,10 +411,71 @@ namespace yaqmv
 		}
 
 		private void BSkinImport_Click(object sender, RoutedEventArgs e)
-		{ }
+		{
+			if (!IsModelLoaded) return;
+			OpenFileDialog openFileDialog = new OpenFileDialog();
+			openFileDialog.Filter = "Quake model files (*.mdl)|*.mdl|All files (*.*)|*.*";
+			if (openFileDialog.ShowDialog() == true)
+			{
+				_loadedAsset = new ModelAsset(openFileDialog.FileName);
+
+				Display(_loadedAsset);
+			}
+		}
 		private void BSkinExport_Click(object sender, RoutedEventArgs e)
-		{ }
+		{
+			if (!IsModelLoaded) return;
+			SaveFileDialog saveFileDialog = new SaveFileDialog();
+			saveFileDialog.Filter = "BMP files (*.bmp)|*.bmp|PNG files (*.png)|*.png|All files (*.*)|*.*";
+			if (saveFileDialog.ShowDialog() == true)
+			{
+				//saveFileDialog.FileName;
+
+			}
+		}
 		private void BUVExport_Click(object sender, RoutedEventArgs e)
-		{ }
+		{
+			if (!IsModelLoaded) return;
+			SaveFileDialog saveFileDialog = new SaveFileDialog();
+			saveFileDialog.Filter = "BMP files (*.bmp)|*.bmp|PNG files (*.png)|*.png|All files (*.*)|*.*";
+			if (saveFileDialog.ShowDialog() == true)
+			{
+				//saveFileDialog.FileName;
+
+			}
+		}
+		private double _oldSkinWinWidth;
+		private void ToggleSkinWindow()
+		{
+			double newWidth = Width;
+			if (IsSkinWindowVisible)
+			{
+				_oldSkinWinWidth = SkinColumn.ActualWidth + 6;
+				newWidth -= _oldSkinWinWidth;
+			}
+			IsSkinWindowVisible = !IsSkinWindowVisible;
+			NotifyPropertyChanged("IsSkinWindowVisible");
+			if (IsSkinWindowVisible)
+			{
+				if (_oldSkinWinWidth == 0)
+				{
+					_oldSkinWinWidth = ModelColumn.ActualWidth;
+					var glc = new GridLengthConverter();
+					SkinColumn.Width = (GridLength)glc.ConvertFrom(_oldSkinWinWidth);
+					_oldSkinWinWidth += 6;
+				}
+				newWidth += _oldSkinWinWidth;
+			}
+			Width = newWidth;
+		}
+		private void ToggleFlagsWindow()
+		{
+			if (IsFlagsWindowVisible)
+				Width -= FlagsColumn.Width.Value;
+			IsFlagsWindowVisible = !IsFlagsWindowVisible;
+			NotifyPropertyChanged("IsFlagsWindowVisible");
+			if (IsFlagsWindowVisible)
+				Width += FlagsColumn.Width.Value;
+		}
 	}
 }
