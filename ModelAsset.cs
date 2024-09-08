@@ -29,7 +29,7 @@ namespace yaqmv
 		internal int VertexCount { get { return header.vertexcount; } }
 		internal int TriangleCount { get { return header.trianglecount; } }
 		internal int FrameCount { get { return header.framecount; } }
-		private int TotalFrameCount { get; }
+		internal int TotalFrameCount { get; }
 		internal Vector3 Scale { get { return header.scale; } }
 		internal Vector3 Origin { get { return header.origin; } }
 

@@ -101,7 +101,7 @@ namespace yaqmv
 				normals.AddRange(normlist);
 			}
 
-			return new Model(asset.FrameCount, indices, UVList, positions, normals);
+			return new Model(asset.TotalFrameCount, indices, UVList, positions, normals);
 		}
 	}
 }
