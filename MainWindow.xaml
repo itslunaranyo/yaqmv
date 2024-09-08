@@ -13,6 +13,20 @@
 		SizeChanged="OnSizeChanged"
 		Title="YAQ Model Viewer"
 		Height="640" Width="480">
+	<Window.CommandBindings>
+		<CommandBinding Command="ApplicationCommands.Open" Executed="MenuFileOpen"/>
+		<CommandBinding Command="{x:Static local:MainWindow.QuitCmd}" Executed="MenuFileQuit"/>
+		<CommandBinding Command="{x:Static local:MainWindow.FocusCmd}" Executed="MenuViewFocus"/>
+		<CommandBinding Command="{x:Static local:MainWindow.ViewSkinCmd}" Executed="MenuViewSkin"/>
+		<CommandBinding Command="{x:Static local:MainWindow.ViewFlagsCmd}" Executed="MenuViewFlags"/>
+	</Window.CommandBindings>
+	<Window.InputBindings>
+		<KeyBinding Key="o" Modifiers="Ctrl" Command="ApplicationCommands.Open" />
+		<KeyBinding Key="q" Modifiers="Ctrl" Command="{x:Static local:MainWindow.QuitCmd}" />
+		<KeyBinding Key="f" Command="{x:Static local:MainWindow.FocusCmd}" />
+		<KeyBinding Key="k" Command="{x:Static local:MainWindow.ViewSkinCmd}" />
+		<KeyBinding Key="g" Command="{x:Static local:MainWindow.ViewFlagsCmd}" />
+	</Window.InputBindings>
 	<Grid Background="#FFDFDFDF">
 		<Grid.RowDefinitions>
 			<RowDefinition Height="Auto"/>
@@ -65,9 +79,15 @@
 		<!-- Top menu bar -->
 		<Menu VerticalAlignment="Top" Grid.Row="0" Grid.ColumnSpan="4">
 			<MenuItem Header="_File">
-				<MenuItem Header="_Open" Click="MenuFileOpen" />
+				<MenuItem Header="_Open" InputGestureText="Ctrl+O" Command="ApplicationCommands.Open" />
 				<Separator />
-				<MenuItem Header="_Exit" Click="MenuFileQuit" />
+				<MenuItem Header="_Exit" InputGestureText="Ctrl+Q" Command="{x:Static local:MainWindow.QuitCmd}" />
+			</MenuItem>
+			<MenuItem Header="_View">
+				<MenuItem Header="_Focus" InputGestureText="F" Command="{x:Static local:MainWindow.FocusCmd}" />
+				<Separator />
+				<MenuItem Header="S_kin" InputGestureText="K" Command="{x:Static local:MainWindow.ViewSkinCmd}" IsChecked="{Binding IsSkinWindowVisible, Mode=OneWay}" />
+				<MenuItem Header="Fla_gs" InputGestureText="G" Command="{x:Static local:MainWindow.ViewFlagsCmd}" IsChecked="{Binding IsFlagsWindowVisible, Mode=OneWay}" />
 			</MenuItem>
 		</Menu>
 

@@ -28,12 +28,11 @@ namespace yaqmv
 		internal ModelState _modelState;
 		internal SkinState _skinState;
 		private DispatcherTimer _time;
+		public GLWpfControlSettings GlobalGLWPFSettings { get; private set; }
 
 		public bool IsModelLoaded { get; private set; }
 		public bool IsSkinWindowVisible { get; private set; }
 		public bool IsFlagsWindowVisible { get; private set; }
-
-		public GLWpfControlSettings GlobalGLWPFSettings { get; private set; }
 
 		public MainWindow()
 		{
@@ -289,8 +288,71 @@ namespace yaqmv
 		}
 
 		// =====================
-		// INPUT
+		// COMMANDS
 		// =====================
+
+		public static RoutedCommand QuitCmd = new RoutedCommand();
+		public static RoutedCommand FocusCmd = new RoutedCommand();
+		public static RoutedCommand ViewSkinCmd = new RoutedCommand();
+		public static RoutedCommand ViewFlagsCmd = new RoutedCommand();
+		private double _oldSkinWinWidth;
+
+		private void FocusCamera()
+		{
+			Camera3D.Recenter(_loadedAsset.CenterOfFrame(0), _loadedAsset.RadiusOfFrame(0));
+		}
+
+		private void MenuFileOpen(object sender, RoutedEventArgs e)
+		{
+			OpenFileDialog openFileDialog = new OpenFileDialog();
+			openFileDialog.Filter = "Quake model files (*.mdl)|*.mdl|All files (*.*)|*.*";
+			if (openFileDialog.ShowDialog() == true)
+			{
+				_loadedAsset = new ModelAsset(openFileDialog.FileName);
+
+				Display(_loadedAsset);
+			}
+		}
+		private void MenuFileQuit(object sender, RoutedEventArgs e) { Close(); }
+		private void MenuViewFocus(object sender, RoutedEventArgs e) { FocusCamera(); }
+		private void MenuViewSkin(object sender, RoutedEventArgs e) { ToggleSkinWindow(); }
+		private void MenuViewFlags(object sender, RoutedEventArgs e) { ToggleFlagsWindow(); }
+
+		private void ToggleSkinWindow()
+		{
+			double newWidth = Width;
+			if (IsSkinWindowVisible)
+			{
+				_oldSkinWinWidth = SkinColumn.ActualWidth + 6;
+				newWidth -= _oldSkinWinWidth;
+			}
+			IsSkinWindowVisible = !IsSkinWindowVisible;
+			NotifyPropertyChanged("IsSkinWindowVisible");
+			if (IsSkinWindowVisible)
+			{
+				if (_oldSkinWinWidth == 0)
+				{
+					_oldSkinWinWidth = ModelColumn.ActualWidth;
+					var glc = new GridLengthConverter();
+					SkinColumn.Width = (GridLength)glc.ConvertFrom(_oldSkinWinWidth);
+					_oldSkinWinWidth += 6;
+				}
+				newWidth += _oldSkinWinWidth;
+			}
+			Width = newWidth;
+		}
+
+		private void ToggleFlagsWindow()
+		{
+			if (IsFlagsWindowVisible)
+				Width -= FlagsColumn.Width.Value;
+			IsFlagsWindowVisible = !IsFlagsWindowVisible;
+			NotifyPropertyChanged("IsFlagsWindowVisible");
+			if (IsFlagsWindowVisible)
+				Width += FlagsColumn.Width.Value;
+		}       // =====================
+				// INPUT
+				// =====================
 
 		private void OnMouseMove(object sender, System.Windows.Input.MouseEventArgs e)
 		{
@@ -319,19 +381,6 @@ namespace yaqmv
 
 		private void OnKeyDown(object sender, KeyEventArgs e)
 		{
-			if (e.Key == Key.F)
-			{
-				Camera3D.Recenter(_loadedAsset.CenterOfFrame(0), _loadedAsset.RadiusOfFrame(0));
-			}
-			if (e.Key == Key.K)
-			{
-				//_modelState.Skin = (_modelState.Skin + 1) % _loadedAsset.SkinCount;
-				ToggleSkinWindow();
-			}
-			if (e.Key == Key.G)
-			{
-				ToggleFlagsWindow();
-			}
 			if (e.Key == Key.OemPeriod)
 			{
 				StepForward();
@@ -343,21 +392,6 @@ namespace yaqmv
 			e.Handled = true;
 		}
 
-		private void MenuFileOpen(object sender, RoutedEventArgs e)
-		{
-			OpenFileDialog openFileDialog = new OpenFileDialog();
-			openFileDialog.Filter = "Quake model files (*.mdl)|*.mdl|All files (*.*)|*.*";
-			if (openFileDialog.ShowDialog() == true)
-			{
-				_loadedAsset = new ModelAsset(openFileDialog.FileName);
-
-				Display(_loadedAsset);
-			}
-		}
-		private void MenuFileQuit(object sender, RoutedEventArgs e)
-		{
-			Close();
-		}
 
 		private void AnimSelect_SelectionChanged(object sender, SelectionChangedEventArgs e)
 		{
@@ -444,38 +478,6 @@ namespace yaqmv
 
 			}
 		}
-		private double _oldSkinWinWidth;
-		private void ToggleSkinWindow()
-		{
-			double newWidth = Width;
-			if (IsSkinWindowVisible)
-			{
-				_oldSkinWinWidth = SkinColumn.ActualWidth + 6;
-				newWidth -= _oldSkinWinWidth;
-			}
-			IsSkinWindowVisible = !IsSkinWindowVisible;
-			NotifyPropertyChanged("IsSkinWindowVisible");
-			if (IsSkinWindowVisible)
-			{
-				if (_oldSkinWinWidth == 0)
-				{
-					_oldSkinWinWidth = ModelColumn.ActualWidth;
-					var glc = new GridLengthConverter();
-					SkinColumn.Width = (GridLength)glc.ConvertFrom(_oldSkinWinWidth);
-					_oldSkinWinWidth += 6;
-				}
-				newWidth += _oldSkinWinWidth;
-			}
-			Width = newWidth;
-		}
-		private void ToggleFlagsWindow()
-		{
-			if (IsFlagsWindowVisible)
-				Width -= FlagsColumn.Width.Value;
-			IsFlagsWindowVisible = !IsFlagsWindowVisible;
-			NotifyPropertyChanged("IsFlagsWindowVisible");
-			if (IsFlagsWindowVisible)
-				Width += FlagsColumn.Width.Value;
-		}
+
 	}
 }
