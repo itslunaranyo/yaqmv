@@ -158,18 +158,6 @@ namespace yaqmv
 			NotifyPropertyChanged("TimelineMax");
 			NotifyPropertyChanged("AnimStatsText");
 		}
-		public int SelectedSkin
-		{
-			get { return _modelState.Skin; }
-			set { _modelState.Skin = value; _skinState.Skin = value; }
-		}
-
-		public int SelectedSkinFrame
-		{
-			get { return _skinState.Skinframe; }
-			set { _skinState.Skinframe = value; }
-		}
-
 		private void Anim_Tick(object sender, EventArgs e)
 		{
 			if (Timeline.Value == _loadedAsset.anims[_modelState.Anim].last)
@@ -211,6 +199,18 @@ namespace yaqmv
 			}
 		}
 
+		public int SelectedSkin
+		{
+			get { return _modelState.Skin; }
+			set { _modelState.Skin = value; _skinState.Skin = value; }
+		}
+
+		public int SelectedSkinFrame
+		{
+			get { return _skinState.Skinframe; }
+			set { _skinState.Skinframe = value; }
+		}
+
 		public int TimelineValue { 
 			get { return _modelState.Frame; } 
 			set { 
@@ -246,7 +246,6 @@ namespace yaqmv
 				" (" + _loadedAsset.frames[ftime].name + ")";
 			}
 		}
-
 		public string SkinText
 		{
 			get
@@ -280,6 +279,9 @@ namespace yaqmv
 				SkinWindow.SetMode((!_UVShow || _UVOverlay), (_UVShow || _UVOverlay));
 			} }
 
+		public bool FiltureTexture { get; set; }
+		public bool InterpolateAnim { get; set; }
+		
 
 		public event PropertyChangedEventHandler? PropertyChanged;
 		private void NotifyPropertyChanged(String propertyName)

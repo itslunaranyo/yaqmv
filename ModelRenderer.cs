@@ -39,6 +39,20 @@ namespace yaqmv
 			_rmode = (RenderMode)mode;
 		}
 
+		internal void BindSkinInMode(Texture tex)
+		{
+			tex.Bind();
+			if (MainWindow.Get.FiltureTexture)
+			{
+				GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
+				GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Linear);
+			}
+			else
+			{
+				GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Nearest);
+				GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Nearest);
+			}
+		}
 		internal void Render(ModelState ms, float w, float h)
 		{
 			GL.ClearColor(0.2f, 0.2f, 0.2f, 1.0f);
@@ -64,7 +78,7 @@ namespace yaqmv
 			if (_rmode == RenderMode.Textured)
 			{
 				GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Fill);
-				_currentAsset?.skins[ms.Skin].images[ms.Skinframe].Tex.Bind();
+				BindSkinInMode(_currentAsset.skins[ms.Skin].images[ms.Skinframe].Tex);
 				Shader.TexturedShaded.Use();
 				Shader.TexturedShaded.SetUniform("model", matmodel);
 				Shader.TexturedShaded.SetUniform("view", matview);
@@ -76,7 +90,7 @@ namespace yaqmv
 			{
 				GL.Enable(EnableCap.PolygonOffsetFill);
 				GL.PolygonOffset(1f, 1);
-				_currentAsset?.skins[ms.Skin].images[ms.Skinframe].Tex.Bind();
+				BindSkinInMode(_currentAsset.skins[ms.Skin].images[ms.Skinframe].Tex);
 				Shader.TexturedShaded.Use();
 				Shader.TexturedShaded.SetUniform("model", matmodel);
 				Shader.TexturedShaded.SetUniform("view", matview);

@@ -112,19 +112,20 @@
 					<ColumnDefinition Width="160"/>
 				</Grid.ColumnDefinitions>
 				<StackPanel Margin="6" Grid.Column="0">
-					<WrapPanel>
-						<TextBlock Text="Render Mode:" />
-						<ComboBox x:Name="ModeSelect" 
-								Width="114" 
-								IsReadOnly="True"
-								SelectionChanged="ModeSelect_SelectionChanged" SelectedIndex="0">
-							<ComboBoxItem Content="Textured"/>
-							<ComboBoxItem Content="Textured Wire"/>
-							<ComboBoxItem Content="Shaded"/>
-							<ComboBoxItem Content="Shaded Wire"/>
-							<ComboBoxItem Content="Wireframe"/>
-						</ComboBox>
-					</WrapPanel>
+					<TextBlock Text="Render Mode:" />
+					<ComboBox x:Name="ModeSelect" 
+							Width="114" 
+							IsReadOnly="True"
+							Margin="0 0 0 4"
+							SelectionChanged="ModeSelect_SelectionChanged" SelectedIndex="0">
+						<ComboBoxItem Content="Textured"/>
+						<ComboBoxItem Content="Textured Wire"/>
+						<ComboBoxItem Content="Shaded"/>
+						<ComboBoxItem Content="Shaded Wire"/>
+						<ComboBoxItem Content="Wireframe"/>
+					</ComboBox>
+					<CheckBox IsChecked="{Binding FiltureTexture}">Filter Texture</CheckBox>
+					<CheckBox IsChecked="{Binding InterpolateAnim}">Interpolate Anim</CheckBox>
 				</StackPanel>
 				<StackPanel Margin="6" Grid.Column="1">
 					<StackPanel Orientation="Horizontal">
