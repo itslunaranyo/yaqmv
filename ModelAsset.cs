@@ -8,6 +8,7 @@ using System.Diagnostics;
 using System.Xaml;
 using System.Collections.ObjectModel;
 using System.Security.Cryptography;
+using System.Windows.Documents;
 
 namespace yaqmv
 {
@@ -56,6 +57,8 @@ namespace yaqmv
 
 				header = new Header(mdlfile);
 
+				Debug.WriteLine("READING");
+				Debug.WriteLine("skins: " + mdlfile.BaseStream.Position);
 				skins = new Skin[header.skincount];
 				for (i = 0; i < header.skincount; i++)
 				{
@@ -77,14 +80,17 @@ namespace yaqmv
 						skins[i] = new Skin(new Image(mdlfile, header));
 				}
 
+				Debug.WriteLine("verts: " + mdlfile.BaseStream.Position);
 				verts = new Vertex[header.vertexcount];
 				for (i = 0; i < header.vertexcount; i++)
 					verts[i] = new Vertex(mdlfile, header);
 
+				Debug.WriteLine("tris: " + mdlfile.BaseStream.Position);
 				tris = new Triangle[header.trianglecount];
 				for (i = 0; i < header.trianglecount; i++)
 					tris[i] = new Triangle(mdlfile, header);
 
+				Debug.WriteLine("frames: " + mdlfile.BaseStream.Position);
 				List<Frame> framelist = new List<Frame>(header.framecount);
 				List<Anim> animlist = [];
 				for (i = 0; i < header.framecount; i++)
@@ -92,6 +98,7 @@ namespace yaqmv
 					group = mdlfile.ReadInt32();
 					if (group != 0)
 					{
+						Debug.WriteLine("\tframegroup: " + mdlfile.BaseStream.Position);
 						animlist.Add(new Anim("_temp_framegroup", framelist.Count, true, framelist.Count + mdlfile.ReadInt32()-1));
 						var anim = animlist.Last();
 
@@ -105,6 +112,7 @@ namespace yaqmv
 							framelist.Add(new Frame(mdlfile, header));
 
 						anim.name = framelist.Last().NamePrefix;
+						anim.SetDurations(durations);
 					}
 					else
 					{
@@ -119,8 +127,8 @@ namespace yaqmv
 							animlist.Add(new Anim(framelist.Last().NamePrefix, framelist.Count-1));
 						}
 					}
-
 				}
+
 				frames = framelist.ToArray();
 				anims = animlist.ToArray();
 				TotalFrameCount = framelist.Count;
@@ -143,7 +151,72 @@ namespace yaqmv
 						SkinFrameNames[i].Add("Frame " + (j++).ToString());
 					i++;
 				}
+				Debug.WriteLine("done reading at: " + mdlfile.BaseStream.Position);
 				Debug.Assert(mdlfile.BaseStream.Position == mdlfile.BaseStream.Length, "didn't read the entire file for some reason");
+			}
+		}
+
+		internal void Write(string mdlpath)
+		{
+			using (var mdlOut = new BinaryWriter(File.OpenWrite(mdlpath), Encoding.ASCII))
+			{
+				header.Write(mdlOut);
+
+				Debug.WriteLine("WRITING");
+				Debug.WriteLine("skins: " + mdlOut.BaseStream.Position);
+
+				Debug.Assert(skins.Length == header.skincount, "Skin count mismatch!");
+				foreach (Skin sk in skins)
+				{
+					if (sk.images.Length > 1)
+					{
+						mdlOut.Write(1);   // needs to be four bytes, 'true' would be 1
+						mdlOut.Write(sk.images.Length);
+						foreach (float f in sk.durations)
+						{
+							mdlOut.Write(f);
+						}
+					}
+					else
+					{
+						mdlOut.Write(0);
+					}
+					foreach (Image i in sk.images)
+					{
+						i.Write(mdlOut);
+					}
+				}
+
+				Debug.WriteLine("verts: " + mdlOut.BaseStream.Position);
+				Debug.Assert(verts.Length == header.vertexcount, "Vertex count mismatch!");
+				foreach (Vertex v in verts)
+				{
+					v.Write(mdlOut);
+				}
+
+				Debug.WriteLine("tris: " + mdlOut.BaseStream.Position);
+				Debug.Assert(tris.Length == header.trianglecount, "Triangle count mismatch!");
+				foreach (Triangle t in tris)
+				{
+					t.Write(mdlOut);
+				}
+
+				Debug.WriteLine("frames: " + mdlOut.BaseStream.Position);
+				foreach (Anim a in anims)
+				{
+					a.Write(mdlOut);
+					for (int i = a.first; i <= a.last; ++i)
+					{
+						if (!a.isGroup)
+							mdlOut.Write(0);
+						frames[i].Write(mdlOut);
+					}
+				}
+
+				Debug.WriteLine("done writing at: " + mdlOut.BaseStream.Position);
+				// the output file always winds up with a single extra closing byte, which means a
+				// mismatch if a file is opened and then saved again - is BinaryWriter doing this
+				// for some reason?
 			}
 		}
 
@@ -213,6 +286,39 @@ namespace yaqmv
 				flags = 0;
 				average_size = 0;
 			}
+			public void Write(BinaryWriter mdlOut)
+			{
+				if (!ident.SequenceEqual("IDPO"))
+					throw new Exception("Ident does not match IDPO");
+
+				mdlOut.Write(ident);
+				mdlOut.Write(version);
+
+				mdlOut.Write(scale[0]);
+				mdlOut.Write(scale[1]);
+				mdlOut.Write(scale[2]);
+
+				mdlOut.Write(origin[0]);
+				mdlOut.Write(origin[1]);
+				mdlOut.Write(origin[2]);
+
+				mdlOut.Write(radius);
+
+				mdlOut.Write(eyepos[0]);
+				mdlOut.Write(eyepos[1]);
+				mdlOut.Write(eyepos[2]);
+
+				mdlOut.Write(skincount);
+				mdlOut.Write(skinwidth);
+				mdlOut.Write(skinheight);
+
+				mdlOut.Write(vertexcount);
+				mdlOut.Write(trianglecount);
+				mdlOut.Write(framecount);
+				mdlOut.Write(synctype);
+				mdlOut.Write(flags);
+				mdlOut.Write(average_size);
+			}
 		};
 
 		internal class Skin
@@ -234,10 +340,10 @@ namespace yaqmv
 		internal class Image
 		{
 			public Texture Tex;
+			byte[] indices;
 
 			public Image(BinaryReader mdl, Header h)
 			{
-				byte[] indices;
 				byte[] pixels;
 				indices = mdl.ReadBytes(h.skinwidth * h.skinheight);
 				pixels = new byte[h.skinwidth * h.skinheight * 4];
@@ -252,15 +358,26 @@ namespace yaqmv
 				}
 				Tex = new Texture(h.skinwidth, h.skinheight, pixels);
 			}
+
+			public void Write(BinaryWriter mdlOut)
+			{
+				mdlOut.Write(indices);
+			}
 		}
 		internal class Vertex
 		{
-			public Vector2 position;   // from file
+			public (int,int) position;   // from file
 			public bool onseam;
 			public Vertex(BinaryReader mdl, Header h)
 			{
 				onseam = mdl.ReadInt32() > 0;
-				position = new Vector2(mdl.ReadInt32(), mdl.ReadInt32());
+				position = (mdl.ReadInt32(), mdl.ReadInt32());
+			}
+			public void Write(BinaryWriter mdlOut)
+			{
+				mdlOut.Write(onseam ? 1 : 0);
+				mdlOut.Write(position.Item1);
+				mdlOut.Write(position.Item2);
 			}
 		}
 		internal class Triangle
@@ -271,6 +388,13 @@ namespace yaqmv
 			{
 				frontface = mdl.ReadInt32() > 0;
 				indices = (mdl.ReadInt32(), mdl.ReadInt32(), mdl.ReadInt32());
+			}
+			public void Write(BinaryWriter mdlOut)
+			{
+				mdlOut.Write(frontface ? 1 : 0);
+				mdlOut.Write(indices.Item1);
+				mdlOut.Write(indices.Item2);
+				mdlOut.Write(indices.Item3);
 			}
 		}
 		internal class Coord
@@ -293,6 +417,13 @@ namespace yaqmv
 					originCompressed.Item2 * mdl.Scale[1] + mdl.Origin[1],
 					originCompressed.Item3 * mdl.Scale[2] + mdl.Origin[2]);
 			}
+			public void Write(BinaryWriter mdlOut)
+			{
+				mdlOut.Write(originCompressed.Item1);
+				mdlOut.Write(originCompressed.Item2);
+				mdlOut.Write(originCompressed.Item3);
+				mdlOut.Write(normalCompressed);
+			}
 		}
 		internal class Anim
 		{
@@ -303,6 +434,7 @@ namespace yaqmv
 			public int frameCount;
 			public int first, last;
 			public bool isGroup;
+			public float[] durations;	// groups only
 
 			public Anim()
 			{
@@ -331,6 +463,23 @@ namespace yaqmv
 					frameCount = 1;
 				}
 			}
+			public void SetDurations(List<float> dur)
+			{
+				durations = dur.ToArray();
+			}
+
+			public void Write(BinaryWriter mdlOut)
+			{
+				if (isGroup)
+				{
+					mdlOut.Write(1);	// 4 byte bool
+					mdlOut.Write(frameCount);
+					mins.Write(mdlOut);
+					maxs.Write(mdlOut);
+					foreach (float f in durations)
+						mdlOut.Write(f);
+				}
+			}
 		}
 
 		internal class Frame
@@ -357,6 +506,21 @@ namespace yaqmv
 				for (int i = 0; i < h.vertexcount; i++)
 				{
 					positions[i] = new Coord(mdl);
+				}
+			}
+			public void Write(BinaryWriter mdlOut)
+			{
+				mins.Write(mdlOut);
+				maxs.Write(mdlOut);
+				mdlOut.Write(Encoding.ASCII.GetBytes(name));
+				for (int i = 16; i > name.Length; --i)
+				{
+					byte zero = 0;
+					mdlOut.Write(zero);
+				}
+				foreach (var p in positions)
+				{
+					p.Write(mdlOut);
 				}
 			}
 			public string NamePrefix { get { return name.TrimEnd(new char[] { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' }); } }
