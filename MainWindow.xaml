@@ -5,7 +5,8 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:glWpfControl="clr-namespace:OpenTK.Wpf;assembly=GLWpfControl"
         xmlns:local="clr-namespace:yaqmv"
-        mc:Ignorable="d"
+		d:DataContext="{d:DesignInstance Type=local:MainWindow}"
+		mc:Ignorable="d"
 		Loaded="Window_Loaded"
  		Unloaded="Window_Unloaded"
 		KeyDown="OnKeyDown"
@@ -13,8 +14,13 @@
 		SizeChanged="OnSizeChanged"
 		Title="YAQ Model Viewer"
 		Height="640" Width="480">
+	<Window.Resources>
+		<local:ModelAsset x:Key="Asset"/>
+	</Window.Resources>
 	<Window.CommandBindings>
 		<CommandBinding Command="ApplicationCommands.Open" Executed="MenuFileOpen"/>
+		<CommandBinding Command="ApplicationCommands.Save" Executed="MenuFileSave"/>
+		<CommandBinding Command="ApplicationCommands.SaveAs" Executed="MenuFileSaveAs"/>
 		<CommandBinding Command="{x:Static local:MainWindow.QuitCmd}" Executed="MenuFileQuit"/>
 		<CommandBinding Command="{x:Static local:MainWindow.FocusCmd}" Executed="MenuViewFocus"/>
 		<CommandBinding Command="{x:Static local:MainWindow.ViewSkinCmd}" Executed="MenuViewSkin"/>
@@ -22,6 +28,7 @@
 	</Window.CommandBindings>
 	<Window.InputBindings>
 		<KeyBinding Key="o" Modifiers="Ctrl" Command="ApplicationCommands.Open" />
+		<KeyBinding Key="s" Modifiers="Ctrl+Shift" Command="ApplicationCommands.SaveAs" />
 		<KeyBinding Key="q" Modifiers="Ctrl" Command="{x:Static local:MainWindow.QuitCmd}" />
 		<KeyBinding Key="f" Command="{x:Static local:MainWindow.FocusCmd}" />
 		<KeyBinding Key="k" Command="{x:Static local:MainWindow.ViewSkinCmd}" />
@@ -78,9 +85,11 @@
 
 		<!-- Top menu bar -->
 		<Menu VerticalAlignment="Top" Grid.Row="0" Grid.ColumnSpan="4">
-			<MenuItem Header="_File">
+			<MenuItem Header="_File" Name="FileMenu" DataContext="{DynamicResource Asset}">
 				<MenuItem Header="_Open" InputGestureText="Ctrl+O" Command="ApplicationCommands.Open" />
-				<Separator />
+				<MenuItem Header="_Save" InputGestureText="Ctrl+S" Command="ApplicationCommands.Save" IsEnabled="{Binding IsModified}"/>
+				<MenuItem Header="Save _As" InputGestureText="Ctrl+Shift+S" Command="ApplicationCommands.SaveAs" IsEnabled="{Binding IsLoaded}"/>
+				
 				<MenuItem Header="_Exit" InputGestureText="Ctrl+Q" Command="{x:Static local:MainWindow.QuitCmd}" />
 			</MenuItem>
 			<MenuItem Header="_View">

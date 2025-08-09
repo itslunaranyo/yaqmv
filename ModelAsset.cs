@@ -9,11 +9,14 @@ using System.Xaml;
 using System.Collections.ObjectModel;
 using System.Security.Cryptography;
 using System.Windows.Documents;
+using System.ComponentModel;
 
 namespace yaqmv
 {
-	internal class ModelAsset
+	public class ModelAsset : INotifyPropertyChanged
 	{
+		internal string filePath;
+
 		Header header;
 		internal Skin[] skins;
 		internal Vertex[] verts;
@@ -34,8 +37,29 @@ namespace yaqmv
 		internal Vector3 Scale { get { return header.scale; } }
 		internal Vector3 Origin { get { return header.origin; } }
 
+		private bool _isLoaded;
+		public bool IsLoaded { get => _isLoaded;
+			private set {
+				if (_isLoaded == value) return; 
+				_isLoaded = value;
+				NotifyPropertyChanged(nameof(IsLoaded));
+			} 
+		}
+		private bool _isModified;
+		public bool IsModified
+		{
+			get => _isModified;
+			private set
+			{
+				if (_isModified == value) return;
+				_isModified = value;
+				NotifyPropertyChanged(nameof(IsModified));
+			}
+		}
+
 		public ModelAsset()
 		{
+			filePath = "";
 			header = new Header();
 			skins = [];
 			verts = [];
@@ -46,10 +70,15 @@ namespace yaqmv
 
 			AnimNames.Clear();
 			SkinNames.Clear();
+
+			IsLoaded = false;
+			IsModified = false;
 		}
 
 		internal ModelAsset(string mdlpath)
 		{
+			filePath = mdlpath;
+
 			using (var mdlfile = new BinaryReader(File.OpenRead(mdlpath), Encoding.ASCII))
 			{
 				float group;
@@ -153,7 +182,14 @@ namespace yaqmv
 				}
 				Debug.WriteLine("done reading at: " + mdlfile.BaseStream.Position);
 				Debug.Assert(mdlfile.BaseStream.Position == mdlfile.BaseStream.Length, "didn't read the entire file for some reason");
+
 			}
+			IsLoaded = true;
+		}
+
+		internal void Write()
+		{
+			Write(filePath);
 		}
 
 		internal void Write(string mdlpath)
@@ -214,9 +250,6 @@ namespace yaqmv
 				}
 
 				Debug.WriteLine("done writing at: " + mdlOut.BaseStream.Position);
-				// the output file always winds up with a single extra closing byte, which means a
-				// mismatch if a file is opened and then saved again - is BinaryWriter doing this
-				// for some reason?
 			}
 		}
 
@@ -538,5 +571,19 @@ namespace yaqmv
 			Vector3 maxs = frames[frame].maxs.UncompressedOrigin(this);
 			return (maxs - mins).Length;
 		}
+
+
+
+
+
+
+
+
+		public event PropertyChangedEventHandler? PropertyChanged;
+		private void NotifyPropertyChanged(String propertyName)
+		{
+			PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+		}
+
 	}
 }

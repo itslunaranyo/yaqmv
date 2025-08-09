@@ -24,13 +24,14 @@ namespace yaqmv
 	{
 		internal ModelWindow _modelWindow;
 		internal SkinWindow _skinWindow;
-		internal ModelAsset _loadedAsset;
+		public ModelAsset _loadedAsset { get; private set; }	// this is a property so the UI bindings can access it
 		internal ModelState _modelState;
 		internal SkinState _skinState;
 		private DispatcherTimer _time;
 		public GLWpfControlSettings GlobalGLWPFSettings { get; private set; }
 
-		public bool IsModelLoaded { get; private set; }
+		public bool IsModelLoaded { get { return _loadedAsset.IsLoaded; } }
+		public bool IsModelModified { get { return _loadedAsset.IsModified; } }
 		public bool IsSkinWindowVisible { get; private set; }
 		public bool IsFlagsWindowVisible { get; private set; }
 
@@ -65,7 +66,7 @@ namespace yaqmv
 			_time.Start();
 
 			_loadedAsset = new ModelAsset();
-			IsModelLoaded = false;
+			Resources["Asset"] = _loadedAsset;
 			Playing = false;
 		}
 		private void Window_Loaded(object sender, RoutedEventArgs e)
@@ -128,7 +129,6 @@ namespace yaqmv
 			_modelWindow.LoadModel(mdl);
 			_skinWindow.LoadModel(mdl);
 
-			IsModelLoaded = true;
 			BSkinImport.IsEnabled = true;
 			BSkinExport.IsEnabled = true;
 			BUVExport.IsEnabled = true;
@@ -146,6 +146,7 @@ namespace yaqmv
 
 			NotifyPropertyChanged("StatsText");
 			NotifyPropertyChanged("SkinText");
+			Resources["Asset"] = _loadedAsset;
 		}
 
 		private void SelectAnim(int a)
@@ -313,6 +314,24 @@ namespace yaqmv
 				_loadedAsset = new ModelAsset(openFileDialog.FileName);
 
 				Display(_loadedAsset);
+			}
+		}
+		private void MenuFileSave(object sender, RoutedEventArgs e)
+		{
+			if (!IsModelLoaded) return;
+			if (!IsModelModified) return;
+
+			_loadedAsset.Write();
+		}
+		private void MenuFileSaveAs(object sender, RoutedEventArgs e)
+		{
+			if (!IsModelLoaded) return;
+
+			SaveFileDialog saveFileDialog = new SaveFileDialog();
+			saveFileDialog.Filter = "Quake model files (*.mdl)|*.mdl|All files (*.*)|*.*";
+			if (saveFileDialog.ShowDialog() == true)
+			{
+				_loadedAsset.Write(saveFileDialog.FileName);
 			}
 		}
 		private void MenuFileQuit(object sender, RoutedEventArgs e) { Close(); }
