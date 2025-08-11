@@ -14,6 +14,8 @@ using Microsoft.Win32;
 using System.ComponentModel;
 using System.Windows.Threading;
 using OpenTK.Wpf;
+using System.Windows.Shell;
+using yaqmv.Properties;
 
 namespace yaqmv
 {
@@ -68,6 +70,8 @@ namespace yaqmv
 			_loadedAsset = new ModelAsset();
 			Resources["Asset"] = _loadedAsset;
 			Playing = false;
+
+			Menu_RepopulateMRU();
 		}
 		private void Window_Loaded(object sender, RoutedEventArgs e)
 		{
@@ -294,15 +298,74 @@ namespace yaqmv
 		// COMMANDS
 		// =====================
 
-		public static RoutedCommand QuitCmd = new RoutedCommand();
-		public static RoutedCommand FocusCmd = new RoutedCommand();
-		public static RoutedCommand ViewSkinCmd = new RoutedCommand();
-		public static RoutedCommand ViewFlagsCmd = new RoutedCommand();
+		public readonly static RoutedCommand QuitCmd = new RoutedCommand();
+		public readonly static RoutedCommand FocusCmd = new RoutedCommand();
+		public readonly static RoutedCommand ViewSkinCmd = new RoutedCommand();
+		public readonly static RoutedCommand ViewFlagsCmd = new RoutedCommand();
+		public readonly static RoutedCommand OpenRecentCmd = new RoutedCommand();
 		private double _oldSkinWinWidth;
 
 		private void FocusCamera()
 		{
 			Camera3D.Recenter(_loadedAsset.CenterOfFrame(0), _loadedAsset.RadiusOfFrame(0));
+		}
+
+		private void Menu_RemoveFromMRU(string path)
+		{
+			Settings.Default.RecentDocuments.Remove(path);
+			Settings.Default.Save();
+
+			Menu_RepopulateMRU();
+		}
+		private void Menu_AddToMRU(string path)
+		{
+			var MRUCollection = Settings.Default.RecentDocuments;
+
+			MRUCollection.Remove(path);
+			MRUCollection.Insert(0, path);
+			if (MRUCollection.Count == 7)
+				MRUCollection.RemoveAt(6);
+			Settings.Default.Save();
+
+			Menu_RepopulateMRU();
+		}
+		private void Menu_RepopulateMRU()
+		{
+			MenuMRU.Items.Clear();
+			var MRUCollection = Settings.Default.RecentDocuments;
+
+			foreach(String p in MRUCollection)
+			{
+				MenuItem mi = new MenuItem();
+				mi.Header = p.Replace("_", "__");   // underscores become menu hotkeys and must be escaped
+				mi.Command = OpenRecentCmd;
+				mi.CommandParameter = p;
+				MenuMRU.Items.Add(mi);
+			}
+		}
+
+		private void MenuFileOpenRecent(object sender, RoutedEventArgs e)
+		{
+			var menuItem = (MenuItem)e.Source;
+			OpenFromFilename(menuItem.CommandParameter as String);
+		}
+
+		private void OpenFromFilename(string filename)
+		{
+			ModelAsset mdl;
+			try
+			{
+				mdl = new ModelAsset(filename);
+			}
+			catch (Exception e)
+			{
+				MessageBox.Show("Couldn't open file!", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+				Menu_RemoveFromMRU(filename);
+				return;
+			}
+			_loadedAsset = mdl;
+			Display(_loadedAsset);
+			Menu_AddToMRU(filename);
 		}
 
 		private void MenuFileOpen(object sender, RoutedEventArgs e)
@@ -311,9 +374,7 @@ namespace yaqmv
 			openFileDialog.Filter = "Quake model files (*.mdl)|*.mdl|All files (*.*)|*.*";
 			if (openFileDialog.ShowDialog() == true)
 			{
-				_loadedAsset = new ModelAsset(openFileDialog.FileName);
-
-				Display(_loadedAsset);
+				OpenFromFilename(openFileDialog.FileName);
 			}
 		}
 		private void MenuFileSave(object sender, RoutedEventArgs e)
@@ -332,6 +393,7 @@ namespace yaqmv
 			if (saveFileDialog.ShowDialog() == true)
 			{
 				_loadedAsset.Write(saveFileDialog.FileName);
+				Menu_AddToMRU(saveFileDialog.FileName);
 			}
 		}
 		private void MenuFileQuit(object sender, RoutedEventArgs e) { Close(); }
@@ -371,9 +433,11 @@ namespace yaqmv
 			NotifyPropertyChanged("IsFlagsWindowVisible");
 			if (IsFlagsWindowVisible)
 				Width += FlagsColumn.Width.Value;
-		}       // =====================
-				// INPUT
-				// =====================
+		}
+		
+		// =====================
+		// INPUT
+		// =====================
 
 		private void OnMouseMove(object sender, System.Windows.Input.MouseEventArgs e)
 		{
