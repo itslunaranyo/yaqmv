@@ -35,5 +35,20 @@ namespace yaqmv
 			GL.BindTexture(TextureTarget.Texture2D, _handle);
 			//GLWhatsWrong();
 		}
+
+		private bool _disposed;
+		~Texture()
+		{
+			if (!_disposed)
+			{
+				Debug.WriteLine("GPU resource leak - undisposed texture");
+			}
+		}
+		public void Dispose()
+		{
+			if (_disposed) return;
+			GL.DeleteTexture(_handle);
+			_disposed = true;
+		}
 	}
 }
