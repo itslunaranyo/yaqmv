@@ -26,6 +26,10 @@
 		<CommandBinding Command="{x:Static local:MainWindow.ViewSkinCmd}" Executed="MenuViewSkin"/>
 		<CommandBinding Command="{x:Static local:MainWindow.ViewFlagsCmd}" Executed="MenuViewFlags"/>
 		<CommandBinding Command="{x:Static local:MainWindow.OpenRecentCmd}" Executed="MenuFileOpenRecent"/>
+		<CommandBinding Command="{x:Static local:MainWindow.SkinAddCmd}" Executed="SkinAdd"/>
+		<CommandBinding Command="{x:Static local:MainWindow.SkinRemoveCmd}" Executed="SkinRemove"/>
+		<CommandBinding Command="{x:Static local:MainWindow.SkinFrameAddCmd}" Executed="SkinFrameAdd"/>
+		<CommandBinding Command="{x:Static local:MainWindow.SkinFrameRemoveCmd}" Executed="SkinFrameRemove"/>
 	</Window.CommandBindings>
 	<Window.InputBindings>
 		<KeyBinding Key="o" Modifiers="Ctrl" Command="ApplicationCommands.Open" />
@@ -291,17 +295,18 @@
 						<ComboBox x:Name="SkinSelect" 
 							Width="80"
 							IsReadOnly="True"
+							ItemsSource="{Binding SkinNames}"
 							SelectionChanged="SkinSelect_SelectionChanged"/>
-						<Button Content="+" Width="20" Margin="6 0"/>
-						<Button Content="-" Width="20"/>
+						<Button Content="+" Width="20" Margin="6 0" Click="SkinAdd"/>
+						<Button Content="-" Width="20" Click="SkinRemove"/>
 					</WrapPanel>
 					<WrapPanel Margin="0 2">
 						<ComboBox x:Name="SkinFrameSelect" 
 							Width="80" 
 							IsReadOnly="True"
 							SelectionChanged="SkinFrameSelect_SelectionChanged" IsEnabled="False"/>
-						<Button Content="+" Width="20" Margin="6 0"/>
-						<Button Content="-" Width="20"/>
+						<Button Content="+" Width="20" Margin="6 0"  Click="SkinFrameAdd"/>
+						<Button Content="-" Width="20"  Click="SkinFrameRemove"/>
 					</WrapPanel>
 					<WrapPanel Margin="0 2">
 						<Button Content="Import..." Margin="0 0 4 0" Padding="4 0" Click="BSkinImport_Click" x:Name="BSkinImport" IsEnabled="False"/>

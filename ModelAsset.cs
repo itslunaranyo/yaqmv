@@ -1,15 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Text;
 using System.IO;
 using OpenTK.Mathematics;
 using System.Diagnostics;
-using System.Xaml;
 using System.Collections.ObjectModel;
-using System.Security.Cryptography;
-using System.Windows.Documents;
 using System.ComponentModel;
+using System.Drawing;
+using System.Drawing.Imaging;
+using System.Runtime.InteropServices;
 
 namespace yaqmv
 {
@@ -18,14 +15,12 @@ namespace yaqmv
 		internal string filePath;
 
 		Header header;
-		internal Skin[] skins;
+		internal List<Skin> skins;
 		internal Vertex[] verts;
 		internal Triangle[] tris;
 		internal Frame[] frames;
 		internal Anim[] anims;
 		internal ObservableCollection<string> AnimNames = [];
-		internal ObservableCollection<string> SkinNames = [];
-		internal List<ObservableCollection<string>> SkinFrameNames = [];
 
 		internal int SkinCount { get { return header.skincount; } }
 		internal int SkinWidth { get { return header.skinwidth; } }
@@ -36,6 +31,18 @@ namespace yaqmv
 		internal int TotalFrameCount { get; }
 		internal Vector3 Scale { get { return header.scale; } }
 		internal Vector3 Origin { get { return header.origin; } }
+
+		public class SkinLayoutChangedArgs
+		{
+			public int Skin { get; set; }
+			public int Frame { get; set; }
+		}
+
+		public event EventHandler<SkinLayoutChangedArgs> SkinLayoutChanged;
+		private void NotifySkinLayoutChanged(int skin, int frame)
+		{
+			SkinLayoutChanged?.Invoke(this, new SkinLayoutChangedArgs() { Skin = skin, Frame = frame });
+		}
 
 		private bool _isLoaded;
 		public bool IsLoaded { get => _isLoaded;
@@ -49,7 +56,7 @@ namespace yaqmv
 		public bool IsModified
 		{
 			get => _isModified;
-			private set
+			set
 			{
 				if (_isModified == value) return;
 				_isModified = value;
@@ -69,7 +76,7 @@ namespace yaqmv
 			TotalFrameCount = 0;
 
 			AnimNames.Clear();
-			SkinNames.Clear();
+			NotifySkinLayoutChanged(0,0);
 
 			IsLoaded = false;
 			IsModified = false;
@@ -88,25 +95,32 @@ namespace yaqmv
 
 				Debug.WriteLine("READING");
 				Debug.WriteLine("skins: " + mdlfile.BaseStream.Position);
-				skins = new Skin[header.skincount];
+				skins = [];
 				for (i = 0; i < header.skincount; i++)
 				{
 					group = mdlfile.ReadInt32();
 					if (group != 0)
 					{
 						int skinFrameCount = mdlfile.ReadInt32();
-						skins[i] = new Skin(skinFrameCount);
+						skins.Add(new Skin(skinFrameCount));
 						for (s = 0; s < skinFrameCount; s++)
 						{
-							skins[i].durations[s] = mdlfile.ReadSingle();
+							skins[i].durations.Add(mdlfile.ReadSingle());
+
+							// should we wish to convert the 'durations' listed in the file to actual 
+							// durations - in the mdl spec they're actually the total time at which
+							// that frame ends relative to start
+							//if (s > 0)
+							//	skins[i].durations[s] -= skins[i].durations[s - 1];
+							// but they're also misintepreted and ignored by every version of quake
 						}
 						for (s = 0; s < skinFrameCount; s++)
 						{
-							skins[i].images[s] = new Image(mdlfile, header);
+							skins[i].images.Add(new Image(mdlfile, header));
 						}
 					}
 					else
-						skins[i] = new Skin(new Image(mdlfile, header));
+						skins.Add(new Skin(new Image(mdlfile, header)));
 				}
 
 				Debug.WriteLine("verts: " + mdlfile.BaseStream.Position);
@@ -165,21 +179,8 @@ namespace yaqmv
 				AnimNames.Clear();
 				foreach (var anim in anims)
 					AnimNames.Add(anim.name);
+				NotifySkinLayoutChanged(0,0);
 
-				SkinNames.Clear();
-				SkinFrameNames.Clear();
-				i = 0;
-				foreach (var skin in skins)
-				{
-					SkinNames.Add("Skin " + i.ToString());
-					SkinFrameNames.Add([]);
-					int j = 0;
-					if (skin.images.Length == 1)
-						SkinFrameNames[i].Add("");
-					else foreach (var img in skin.images)
-						SkinFrameNames[i].Add("Frame " + (j++).ToString());
-					i++;
-				}
 				Debug.WriteLine("done reading at: " + mdlfile.BaseStream.Position);
 				Debug.Assert(mdlfile.BaseStream.Position == mdlfile.BaseStream.Length, "didn't read the entire file for some reason");
 
@@ -201,13 +202,13 @@ namespace yaqmv
 				Debug.WriteLine("WRITING");
 				Debug.WriteLine("skins: " + mdlOut.BaseStream.Position);
 
-				Debug.Assert(skins.Length == header.skincount, "Skin count mismatch!");
+				Debug.Assert(skins.Count == header.skincount, "Skin count mismatch!");
 				foreach (Skin sk in skins)
 				{
-					if (sk.images.Length > 1)
+					if (sk.images.Count > 1)
 					{
 						mdlOut.Write(1);   // needs to be four bytes, 'true' would be 1
-						mdlOut.Write(sk.images.Length);
+						mdlOut.Write(sk.images.Count);
 						foreach (float f in sk.durations)
 						{
 							mdlOut.Write(f);
@@ -251,6 +252,63 @@ namespace yaqmv
 
 				Debug.WriteLine("done writing at: " + mdlOut.BaseStream.Position);
 			}
+		}
+
+		internal void ReplaceImage(Bitmap bmp, int skin = 0, int frame = 0)
+		{
+			Debug.Assert(skin < skins.Count);
+			Debug.Assert(frame < skins[skin].images.Count);
+			Image img = new Image(bmp);
+			skins[skin].images[frame] = img;
+
+			IsModified = true;
+		}
+
+		internal void AddSkin(Bitmap bmp)
+		{
+			Image img = new Image(bmp);
+			skins.Add(new Skin(img));
+			header.skincount++;
+			NotifySkinLayoutChanged(skins.Count - 1, 0);
+
+			IsModified = true;
+		}
+		internal void DeleteSkin(int skin = 0)
+		{
+			Debug.Assert(skins.Count > 1);
+			Debug.Assert(skin < skins.Count);
+			skins[skin].Dispose();
+			skins.RemoveAt(skin);
+			header.skincount--;
+			NotifySkinLayoutChanged(skin, 0);
+
+			IsModified = true;
+		}
+
+		internal void AddSkinframe(Bitmap bmp, int skin = 0)
+		{
+			Debug.Assert(skin < skins.Count);
+			skins[skin].images.Add(new Image(bmp));
+
+			// no quake port respects this value, including the originals, but we should specify it somehow ...
+			skins[skin].durations.Add(0.1f);
+			NotifySkinLayoutChanged(skin, skins[skin].images.Count - 1);
+
+			IsModified = true;
+		}
+		internal void DeleteSkinframe(int skin = 0, int frame = 0)
+		{
+			Debug.Assert(skin < skins.Count);
+
+			Debug.Assert(skins[skin].images.Count > 1);
+			Debug.Assert(frame < skins[skin].images.Count);
+
+			skins[skin].images[frame].Dispose();
+			skins[skin].images.RemoveAt(frame);
+			skins[skin].durations.RemoveAt(frame);
+			NotifySkinLayoutChanged(skin, frame);
+
+			IsModified = true;
 		}
 
 		internal struct Header
@@ -354,34 +412,64 @@ namespace yaqmv
 			}
 		};
 
-		internal class Skin
+		internal class Skin : IDisposable
 		{
-			public Image[] images;
-			public float[] durations;
+			public List<Image> images;
+			public List<float> durations;
 			public Skin(Image i)
 			{
 				images = [i];
-				durations = [0f];
+				durations = [0.1f];
 			}
 			public Skin(int frames)
 			{
-				images = new Image[frames];
-				durations = new float[frames];
+				images = new List<Image>();
+				durations = new List<float>();
+			}
+			private bool _disposed;
+			~Skin() { if (!_disposed) Debug.WriteLine("Undisposed skin"); }
+			public void Dispose()
+			{
+				if (_disposed) return;
+				foreach (Image img in images) img.Dispose();
+				_disposed = true;
 			}
 		}
 
-		internal class Image
+		internal class Image : IDisposable
 		{
 			public Texture Tex;
 			byte[] indices;
 
 			public Image(BinaryReader mdl, Header h)
 			{
-				byte[] pixels;
 				indices = mdl.ReadBytes(h.skinwidth * h.skinheight);
-				pixels = new byte[h.skinwidth * h.skinheight * 4];
+				GenTexture(h.skinwidth, h.skinheight);
+			}
+
+			public Image(Bitmap bmp)
+			{
+				BitmapData data = bmp.LockBits(new Rectangle(0, 0, bmp.Width, bmp.Height), ImageLockMode.ReadOnly, bmp.PixelFormat);
+				int size = bmp.Width * bmp.Height;
+				byte[] bytedata = new byte[size];
+
+				Marshal.Copy(data.Scan0, bytedata, 0, size);
+
+				indices = bytedata;
+				GenTexture(bmp.Width, bmp.Height);
+			}
+
+			public void Write(BinaryWriter mdlOut)
+			{
+				mdlOut.Write(indices);
+			}
+
+			private void GenTexture(int w, int h)
+			{
+				byte[] pixels;
+				pixels = new byte[w * h * 4];
 				int j = 0;
-				for (int i = 0; i < h.skinwidth * h.skinheight; i++)
+				for (int i = 0; i < w * h; i++)
 				{
 					var color = Palette.Color(indices[i]);
 					pixels[j++] = color.Item1;
@@ -389,12 +477,16 @@ namespace yaqmv
 					pixels[j++] = color.Item3;
 					pixels[j++] = color.Item4;
 				}
-				Tex = new Texture(h.skinwidth, h.skinheight, pixels);
+				Tex = new Texture(w, h, pixels);
 			}
 
-			public void Write(BinaryWriter mdlOut)
+			private bool _disposed;
+			~Image() { if (!_disposed) Debug.WriteLine("Undisposed image"); }
+			public void Dispose()
 			{
-				mdlOut.Write(indices);
+				if (_disposed) return;
+				Tex.Dispose();
+				_disposed = true;
 			}
 		}
 		internal class Vertex
