@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Drawing;
+using System.Drawing.Imaging;
+using System.IO;
 using System.Text;
 using System.Windows;
 using System.Windows.Controls;
@@ -625,8 +627,14 @@ namespace yaqmv
 			saveFileDialog.Filter = "BMP files (*.bmp)|*.bmp|PNG files (*.png)|*.png|All files (*.*)|*.*";
 			if (saveFileDialog.ShowDialog() == true)
 			{
-				//saveFileDialog.FileName;
+				Bitmap bmp = _loadedAsset.ExportSkinImage(_modelState.Skin, _modelState.Skinframe);
 
+				ImageFormat fmt = ImageFormat.Png;
+				if (Path.GetExtension(saveFileDialog.FileName) == ".bmp")
+					fmt = ImageFormat.Bmp;
+				//else if (Path.GetExtension(saveFileDialog.FileName) != ".png")
+				// just write a png anyway, they'll figure it out
+				bmp.Save(saveFileDialog.FileName, fmt);
 			}
 		}
 		private void BUVExport_Click(object sender, RoutedEventArgs e)

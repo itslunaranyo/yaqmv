@@ -4,6 +4,7 @@ using System.Linq;
 using OpenTK.Mathematics;
 using System.Text;
 using System.Threading.Tasks;
+using System.Drawing;
 
 namespace yaqmv
 {
@@ -60,6 +61,14 @@ namespace yaqmv
 				palette[index * 3 + 1], 
 				palette[index * 3 + 2], 
 				index > 239 ? 255 : 0	// fullbright alpha
+				);
+		}
+		public static Color ColorSystem(int index)
+		{
+			return System.Drawing.Color.FromArgb(
+				palette[index * 3],
+				palette[index * 3 + 1],
+				palette[index * 3 + 2]
 				);
 		}
 	}

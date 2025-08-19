@@ -1,12 +1,13 @@
-﻿using System.Text;
-using System.IO;
-using OpenTK.Mathematics;
-using System.Diagnostics;
+﻿using OpenTK.Mathematics;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Imaging;
+using System.IO;
 using System.Runtime.InteropServices;
+using System.Text;
+using System.Windows;
 
 namespace yaqmv
 {
@@ -311,6 +312,26 @@ namespace yaqmv
 			IsModified = true;
 		}
 
+		public Bitmap ExportSkinImage(int skin = 0, int frame = 0)
+		{
+			Debug.Assert(skin < skins.Count);
+			Debug.Assert(frame < skins[skin].images.Count);
+			// the last parameter expects full color input to match to the palette
+			// itself, and if we give it that we run afoul of quake's duplicated
+			// palette indices and write a skin that isn't 1:1 what's in the .mdl
+			//Bitmap bmp = new Bitmap(SkinWidth, SkinHeight, SkinWidth, PixelFormat.Format8bppIndexed, skins[skin].images[frame].indices[0]);
+			Bitmap bmp = new Bitmap(SkinWidth, SkinHeight, PixelFormat.Format8bppIndexed);
+			ColorPalette pal = bmp.Palette;
+			for (int i = 0; i < 256; i++)
+			{
+				pal.Entries[i] = Palette.ColorSystem(i);
+			}
+			bmp.Palette = pal;
+
+			skins[skin].images[frame].Export(ref bmp);
+			return bmp;
+		}
+
 		internal struct Header
 		{
 			internal char[] ident;
@@ -439,7 +460,7 @@ namespace yaqmv
 		internal class Image : IDisposable
 		{
 			public Texture Tex;
-			byte[] indices;
+			internal byte[] indices;
 
 			public Image(BinaryReader mdl, Header h)
 			{
@@ -449,14 +470,22 @@ namespace yaqmv
 
 			public Image(Bitmap bmp)
 			{
-				BitmapData data = bmp.LockBits(new Rectangle(0, 0, bmp.Width, bmp.Height), ImageLockMode.ReadOnly, bmp.PixelFormat);
 				int size = bmp.Width * bmp.Height;
 				byte[] bytedata = new byte[size];
 
+				BitmapData data = bmp.LockBits(new Rectangle(0, 0, bmp.Width, bmp.Height), ImageLockMode.ReadOnly, bmp.PixelFormat);
 				Marshal.Copy(data.Scan0, bytedata, 0, size);
+				bmp.UnlockBits(data);
 
 				indices = bytedata;
 				GenTexture(bmp.Width, bmp.Height);
+			}
+
+			public void Export(ref Bitmap bmp)
+			{
+				BitmapData data = bmp.LockBits(new Rectangle(0, 0, bmp.Width, bmp.Height), ImageLockMode.WriteOnly, bmp.PixelFormat);
+				Marshal.Copy(indices, 0, data.Scan0, bmp.Width * bmp.Height);
+				bmp.UnlockBits(data);
 			}
 
 			public void Write(BinaryWriter mdlOut)
