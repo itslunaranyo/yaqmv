@@ -420,7 +420,7 @@ namespace yaqmv
 			{
 				_loadedAsset.Write(saveFileDialog.FileName);
 				Menu_AddToMRU(saveFileDialog.FileName);
-				_loadedAsset.Write();
+				_loadedAsset.IsModified = false;
 			}
 		}
 
