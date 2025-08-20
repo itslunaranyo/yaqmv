@@ -103,7 +103,7 @@ namespace yaqmv
 					if (group != 0)
 					{
 						int skinFrameCount = mdlfile.ReadInt32();
-						skins.Add(new Skin(skinFrameCount));
+						skins.Add(new Skin());
 						for (s = 0; s < skinFrameCount; s++)
 						{
 							skins[i].durations.Add(mdlfile.ReadSingle());
@@ -135,7 +135,7 @@ namespace yaqmv
 					tris[i] = new Triangle(mdlfile, header);
 
 				Debug.WriteLine("frames: " + mdlfile.BaseStream.Position);
-				List<Frame> framelist = new List<Frame>(header.framecount);
+				List<Frame> framelist = new(header.framecount);
 				List<Anim> animlist = [];
 				for (i = 0; i < header.framecount; i++)
 				{
@@ -149,7 +149,7 @@ namespace yaqmv
 						anim.mins = new Coord(mdlfile);
 						anim.maxs = new Coord(mdlfile);
 
-						List<float> durations = new List<float>(anim.frameCount);
+						List<float> durations = new(anim.frameCount);
 						for (int j = 0; j < anim.frameCount; j++)
 							durations.Add(mdlfile.ReadSingle());
 						for (int j = 0; j < anim.frameCount; j++)
@@ -173,8 +173,8 @@ namespace yaqmv
 					}
 				}
 
-				frames = framelist.ToArray();
-				anims = animlist.ToArray();
+				frames = [.. framelist]; //framelist.ToArray();
+				anims = [.. animlist]; //animlist.ToArray();
 				TotalFrameCount = framelist.Count;
 
 				AnimNames.Clear();
@@ -259,7 +259,7 @@ namespace yaqmv
 		{
 			Debug.Assert(skin < skins.Count);
 			Debug.Assert(frame < skins[skin].images.Count);
-			Image img = new Image(bmp);
+			Image img = new(bmp);
 			skins[skin].images[frame] = img;
 
 			IsModified = true;
@@ -267,7 +267,7 @@ namespace yaqmv
 
 		internal void AddSkin(Bitmap bmp)
 		{
-			Image img = new Image(bmp);
+			Image img = new(bmp);
 			skins.Add(new Skin(img));
 			header.skincount++;
 			NotifySkinLayoutChanged(skins.Count - 1, 0);
@@ -320,7 +320,7 @@ namespace yaqmv
 			// itself, and if we give it that we run afoul of quake's duplicated
 			// palette indices and write a skin that isn't 1:1 what's in the .mdl
 			//Bitmap bmp = new Bitmap(SkinWidth, SkinHeight, SkinWidth, PixelFormat.Format8bppIndexed, skins[skin].images[frame].indices[0]);
-			Bitmap bmp = new Bitmap(SkinWidth, SkinHeight, PixelFormat.Format8bppIndexed);
+			Bitmap bmp = new(SkinWidth, SkinHeight, PixelFormat.Format8bppIndexed);
 			ColorPalette pal = bmp.Palette;
 			for (int i = 0; i < 256; i++)
 			{
@@ -382,7 +382,7 @@ namespace yaqmv
 			}
 			public Header()
 			{
-				ident = new char[]{ 'l','o','l','.' };
+				ident = [ 'l','o','l','.' ];
 				version = 0;
 				scale = new Vector3(0);
 				origin = new Vector3(0);
@@ -442,10 +442,10 @@ namespace yaqmv
 				images = [i];
 				durations = [0.1f];
 			}
-			public Skin(int frames)
+			public Skin()
 			{
-				images = new List<Image>();
-				durations = new List<float>();
+				images = [];
+				durations = [];
 			}
 			private bool _disposed;
 			~Skin() { if (!_disposed) Debug.WriteLine("Undisposed skin"); }
@@ -453,6 +453,7 @@ namespace yaqmv
 			{
 				if (_disposed) return;
 				foreach (Image img in images) img.Dispose();
+				GC.SuppressFinalize(this);
 				_disposed = true;
 			}
 		}
@@ -515,6 +516,7 @@ namespace yaqmv
 			{
 				if (_disposed) return;
 				Tex.Dispose();
+				GC.SuppressFinalize(this);
 				_disposed = true;
 			}
 		}
@@ -619,7 +621,7 @@ namespace yaqmv
 			}
 			public void SetDurations(List<float> dur)
 			{
-				durations = dur.ToArray();
+				durations = [.. dur]; //dur.ToArray();
 			}
 
 			public void Write(BinaryWriter mdlOut)
@@ -677,7 +679,7 @@ namespace yaqmv
 					p.Write(mdlOut);
 				}
 			}
-			public string NamePrefix { get { return name.TrimEnd(new char[] { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' }); } }
+			public string NamePrefix { get { return name.TrimEnd(['0', '1', '2', '3', '4', '5', '6', '7', '8', '9' ]); } }
 		}
 
 		internal Vector3 CenterOfFrame(int frame)

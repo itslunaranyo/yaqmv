@@ -22,14 +22,14 @@ namespace yaqmv
 	{
 		internal ModelWindow _modelWindow;
 		internal SkinWindow _skinWindow;
-		public ModelAsset _loadedAsset { get; private set; }	// this is a property so the UI bindings can access it
+		public ModelAsset LoadedAsset { get; private set; }	// this is a property so the UI bindings can access it
 		internal ModelState _modelState;
 		internal SkinState _skinState;
-		private DispatcherTimer _time;
+		private readonly DispatcherTimer _time;
 		public GLWpfControlSettings GlobalGLWPFSettings { get; private set; }
 
-		public bool IsModelLoaded { get { return _loadedAsset.IsLoaded; } }
-		public bool IsModelModified { get { return _loadedAsset.IsModified; } }
+		public bool IsModelLoaded { get { return LoadedAsset.IsLoaded; } }
+		public bool IsModelModified { get { return LoadedAsset.IsModified; } }
 		public bool IsSkinWindowVisible { get; private set; }
 		public bool IsFlagsWindowVisible { get; private set; }
 
@@ -61,23 +61,23 @@ namespace yaqmv
 
 			DataContext = this;
 
-			_time = new DispatcherTimer();
+			_time = new();
 			_time.Interval = TimeSpan.FromSeconds(0.1);
 			_time.Tick += Anim_Tick;
 			_time.Start();
 			Closing += OnWindowClosing;
 
-			_loadedAsset = new ModelAsset();
-			Resources["Asset"] = _loadedAsset;
+			LoadedAsset = new ModelAsset();
+			Resources["Asset"] = LoadedAsset;
 			Playing = false;
 
 			Menu_RepopulateMRU();
 		}
 		private void Window_Loaded(object sender, RoutedEventArgs e)
 		{
-			NotifyPropertyChanged("StatsText");
-			NotifyPropertyChanged("AnimStatsText");
-			NotifyPropertyChanged("AnimStatsText");
+			NotifyPropertyChanged(nameof(StatsText));
+			NotifyPropertyChanged(nameof(AnimStatsText));
+			NotifyPropertyChanged(nameof(AnimStatsText));
 			NotifyPropertyChanged("SkinText");
 		}
 		private void Window_Unloaded(object sender, RoutedEventArgs e) { _modelWindow.OnUnload(sender, e); }
@@ -85,7 +85,7 @@ namespace yaqmv
 		private void OnSizeChanged(object sender, SizeChangedEventArgs e)
 		{
 			// change size of child grids correctly
-			double widthDiff = e.NewSize.Width - e.PreviousSize.Width;
+			//double widthDiff = e.NewSize.Width - e.PreviousSize.Width;
 
 		}
 
@@ -97,14 +97,14 @@ namespace yaqmv
 
 			skinTime += delta.TotalSeconds;
 
-			if (IsModelLoaded && _loadedAsset.skins.Count > 0)
+			if (IsModelLoaded && LoadedAsset.skins.Count > 0)
 			{
 				// emulate quake's broken frame time interpetation - use the first frame length for every frame
-				float frameTime = _loadedAsset.skins[_modelState.Skin].durations[0];	
+				float frameTime = LoadedAsset.skins[_modelState.Skin].durations[0];	
 
 				if (skinTime > frameTime)
 				{
-					_modelState.Skinframe = (_modelState.Skinframe + 1) % _loadedAsset.skins[_modelState.Skin].images.Count;
+					_modelState.Skinframe = (_modelState.Skinframe + 1) % LoadedAsset.skins[_modelState.Skin].images.Count;
 					skinTime -= frameTime;
 				}
 			}
@@ -131,15 +131,15 @@ namespace yaqmv
 			Playing = false;
 			skinTime = 0;
 			SelectAnim(0);
-			AnimSelect.ItemsSource = _loadedAsset.AnimNames;
+			AnimSelect.ItemsSource = LoadedAsset.AnimNames;
 			AnimSelect.SelectedIndex = 0;
 
-			_loadedAsset.SkinLayoutChanged += OnSkinLayoutChanged;
+			LoadedAsset.SkinLayoutChanged += OnSkinLayoutChanged;
 			DoSkinLayoutChanged(0,0);
 
-			NotifyPropertyChanged("StatsText");
+			NotifyPropertyChanged(nameof(StatsText));
 			NotifyPropertyChanged("SkinText");
-			Resources["Asset"] = _loadedAsset;	// undo this, should go through mv
+			Resources["Asset"] = LoadedAsset;	// undo this, should go through mv
 		}
 
 		private void SelectAnim(int a)
@@ -147,15 +147,15 @@ namespace yaqmv
 			if (a != _modelState.Anim)
 			_modelState.Anim = a;
 
-			Timeline.Value = _loadedAsset.anims[_modelState.Anim].first;
-			NotifyPropertyChanged("TimelineMin");
-			NotifyPropertyChanged("TimelineMax");
-			NotifyPropertyChanged("AnimStatsText");
+			Timeline.Value = LoadedAsset.anims[_modelState.Anim].first;
+			NotifyPropertyChanged(nameof(TimelineMin));
+			NotifyPropertyChanged(nameof(TimelineMax));
+			NotifyPropertyChanged(nameof(AnimStatsText));
 		}
 		private void Anim_Tick(object sender, EventArgs e)
 		{
-			if (Timeline.Value == _loadedAsset.anims[_modelState.Anim].last)
-				Timeline.Value = _loadedAsset.anims[_modelState.Anim].first;
+			if (Timeline.Value == LoadedAsset.anims[_modelState.Anim].last)
+				Timeline.Value = LoadedAsset.anims[_modelState.Anim].first;
 			else
 				Timeline.Value += 1;
 		}
@@ -209,12 +209,12 @@ namespace yaqmv
 			get { return _modelState.Frame; } 
 			set { 
 				_modelState.Frame = value;
-				NotifyPropertyChanged("TimelineValue");
-				NotifyPropertyChanged("AnimStatsText");
+				NotifyPropertyChanged(nameof(TimelineValue));
+				NotifyPropertyChanged(nameof(AnimStatsText));
 			} 
 		}
-		public int TimelineMin { get { return _loadedAsset.anims[_modelState.Anim].first; } }
-		public int TimelineMax { get { return _loadedAsset.anims[_modelState.Anim].last; } }
+		public int TimelineMin { get { return LoadedAsset.anims[_modelState.Anim].first; } }
+		public int TimelineMax { get { return LoadedAsset.anims[_modelState.Anim].last; } }
 		public int ClampToTimeline(int a)
 		{
 			return Math.Min(TimelineMax, Math.Max(a, TimelineMin));
@@ -225,19 +225,19 @@ namespace yaqmv
 			//	"\nTriangles: " + _loadedAsset.TriangleCount.ToString() +
 			//	"\nFrames: " + _loadedAsset.FrameCount.ToString() +
 			//	"\nSkins: " + _loadedAsset.SkinCount.ToString();
-			return _loadedAsset.VertexCount.ToString() +
-				"\n" + _loadedAsset.TriangleCount.ToString() +
-				"\n" + _loadedAsset.FrameCount.ToString() +
-				"\n" + _loadedAsset.SkinCount.ToString();
+			return LoadedAsset.VertexCount.ToString() +
+				"\n" + LoadedAsset.TriangleCount.ToString() +
+				"\n" + LoadedAsset.FrameCount.ToString() +
+				"\n" + LoadedAsset.SkinCount.ToString();
 			}
 		}
 		public string AnimStatsText { get {
-			int ftime = ((int)Timeline.Value > _loadedAsset.frames.Length) ? 0 : (int)Timeline.Value;
+			int ftime = ((int)Timeline.Value > LoadedAsset.frames.Length) ? 0 : (int)Timeline.Value;
 			return "Frames: " + (TimelineMax - TimelineMin + 1).ToString() +
 				" (" + TimelineMin.ToString() +
 				"-" + TimelineMax.ToString() + 
 				")\nCurrent: " + ftime.ToString() +
-				" (" + _loadedAsset.frames[ftime].name + ")";
+				" (" + LoadedAsset.frames[ftime].name + ")";
 			}
 		}
 		public string SkinSizeText
@@ -247,9 +247,9 @@ namespace yaqmv
 				if (!IsModelLoaded)
 					return "";
 
-				return _loadedAsset.SkinWidth.ToString() +
+				return LoadedAsset.SkinWidth.ToString() +
 					" x " +
-					_loadedAsset.SkinHeight.ToString();
+					LoadedAsset.SkinHeight.ToString();
 			}
 		}
 
@@ -260,7 +260,7 @@ namespace yaqmv
 			set {
 				_UVShow = value;
 				_UVOverlay = false;
-				NotifyPropertyChanged("UVOverlay");
+				NotifyPropertyChanged(nameof(UVOverlay));
 				SkinWindow.SetMode((!_UVShow || _UVOverlay), (_UVShow || _UVOverlay));
 			}
 		}
@@ -269,7 +269,7 @@ namespace yaqmv
 			set {
 				_UVOverlay = value;
 				_UVShow = false;
-				NotifyPropertyChanged("UVShow");
+				NotifyPropertyChanged(nameof(UVShow));
 				SkinWindow.SetMode((!_UVShow || _UVOverlay), (_UVShow || _UVOverlay));
 			} }
 
@@ -295,7 +295,7 @@ namespace yaqmv
 			SkinNames.Clear();
 			SkinFrameNames.Clear();
 			int i = 0;
-			foreach (var sk in _loadedAsset.skins)
+			foreach (var sk in LoadedAsset.skins)
 			{
 				SkinNames.Add("Skin " + i.ToString());
 				SkinFrameNames.Add([]);
@@ -321,20 +321,20 @@ namespace yaqmv
 		// COMMANDS
 		// =====================
 
-		public readonly static RoutedCommand QuitCmd = new RoutedCommand();
-		public readonly static RoutedCommand FocusCmd = new RoutedCommand();
-		public readonly static RoutedCommand ViewSkinCmd = new RoutedCommand();
-		public readonly static RoutedCommand ViewFlagsCmd = new RoutedCommand();
-		public readonly static RoutedCommand OpenRecentCmd = new RoutedCommand();
-		public readonly static RoutedCommand SkinAddCmd = new RoutedCommand();
-		public readonly static RoutedCommand SkinRemoveCmd = new RoutedCommand();
-		public readonly static RoutedCommand SkinFrameAddCmd = new RoutedCommand();
-		public readonly static RoutedCommand SkinFrameRemoveCmd = new RoutedCommand();
+		public readonly static RoutedCommand QuitCmd = new();
+		public readonly static RoutedCommand FocusCmd = new();
+		public readonly static RoutedCommand ViewSkinCmd = new();
+		public readonly static RoutedCommand ViewFlagsCmd = new();
+		public readonly static RoutedCommand OpenRecentCmd = new();
+		public readonly static RoutedCommand SkinAddCmd = new();
+		public readonly static RoutedCommand SkinRemoveCmd = new();
+		public readonly static RoutedCommand SkinFrameAddCmd = new();
+		public readonly static RoutedCommand SkinFrameRemoveCmd = new();
 		private double _oldSkinWinWidth;
 
 		private void FocusCamera()
 		{
-			Camera3D.Recenter(_loadedAsset.CenterOfFrame(0), _loadedAsset.RadiusOfFrame(0));
+			Camera3D.Recenter(LoadedAsset.CenterOfFrame(0), LoadedAsset.RadiusOfFrame(0));
 		}
 
 		private void Menu_RemoveFromMRU(string path)
@@ -363,10 +363,12 @@ namespace yaqmv
 
 			foreach(String p in MRUCollection)
 			{
-				MenuItem mi = new MenuItem();
-				mi.Header = p.Replace("_", "__");   // underscores become menu hotkeys and must be escaped
-				mi.Command = OpenRecentCmd;
-				mi.CommandParameter = p;
+				MenuItem mi = new()
+				{
+					Header = p.Replace("_", "__"),   // underscores become menu hotkeys and must be escaped
+					Command = OpenRecentCmd,
+					CommandParameter = p
+				};
 				MenuMRU.Items.Add(mi);
 			}
 		}
@@ -390,15 +392,14 @@ namespace yaqmv
 				Menu_RemoveFromMRU(filename);
 				return;
 			}
-			_loadedAsset = mdl;
-			Display(_loadedAsset);
+			LoadedAsset = mdl;
+			Display(LoadedAsset);
 			Menu_AddToMRU(filename);
 		}
 
 		private void MenuFileOpen(object sender, RoutedEventArgs e)
 		{
-			OpenFileDialog openFileDialog = new OpenFileDialog();
-			openFileDialog.Filter = "Quake model files (*.mdl)|*.mdl|All files (*.*)|*.*";
+			OpenFileDialog openFileDialog = new() { Filter = "Quake model files (*.mdl)|*.mdl|All files (*.*)|*.*" };
 			if (openFileDialog.ShowDialog() == true)
 			{
 				OpenFromFilename(openFileDialog.FileName);
@@ -409,20 +410,20 @@ namespace yaqmv
 			if (!IsModelLoaded) return;
 			if (!IsModelModified) return;
 
-			_loadedAsset.Write();
-			_loadedAsset.IsModified = false;
+			LoadedAsset.Write();
+			LoadedAsset.IsModified = false;
 		}
 		private void MenuFileSaveAs(object sender, RoutedEventArgs e)
 		{
 			if (!IsModelLoaded) return;
 
-			SaveFileDialog saveFileDialog = new SaveFileDialog();
+			SaveFileDialog saveFileDialog = new();
 			saveFileDialog.Filter = "Quake model files (*.mdl)|*.mdl|All files (*.*)|*.*";
 			if (saveFileDialog.ShowDialog() == true)
 			{
-				_loadedAsset.Write(saveFileDialog.FileName);
+				LoadedAsset.Write(saveFileDialog.FileName);
 				Menu_AddToMRU(saveFileDialog.FileName);
-				_loadedAsset.IsModified = false;
+				LoadedAsset.IsModified = false;
 			}
 		}
 
@@ -431,11 +432,11 @@ namespace yaqmv
 			if (!IsModelLoaded)
 				return null;
 
-			OpenFileDialog openFileDialog = new OpenFileDialog();
+			OpenFileDialog openFileDialog = new();
 			openFileDialog.Filter = "BMP files (*.bmp)|*.bmp|PNG files (*.png)|*.png|All files (*.*)|*.*";
 			if (openFileDialog.ShowDialog() == true)
 			{
-				Bitmap bmp = new Bitmap(openFileDialog.FileName);
+				Bitmap bmp = new(openFileDialog.FileName);
 				if (CheckBitmapSize(bmp))
 					return bmp;
 			}
@@ -465,7 +466,7 @@ namespace yaqmv
 				newWidth -= _oldSkinWinWidth;
 			}
 			IsSkinWindowVisible = !IsSkinWindowVisible;
-			NotifyPropertyChanged("IsSkinWindowVisible");
+			NotifyPropertyChanged(nameof(IsSkinWindowVisible));
 			if (IsSkinWindowVisible)
 			{
 				if (_oldSkinWinWidth == 0)
@@ -485,7 +486,7 @@ namespace yaqmv
 			if (IsFlagsWindowVisible)
 				Width -= FlagsColumn.Width.Value;
 			IsFlagsWindowVisible = !IsFlagsWindowVisible;
-			NotifyPropertyChanged("IsFlagsWindowVisible");
+			NotifyPropertyChanged(nameof(IsFlagsWindowVisible));
 			if (IsFlagsWindowVisible)
 				Width += FlagsColumn.Width.Value;
 		}
@@ -495,24 +496,24 @@ namespace yaqmv
 			Bitmap? bmp = SkinOpenDialog();
 			if (bmp != null)
 			{
-				_loadedAsset.AddSkin(bmp);
+				LoadedAsset.AddSkin(bmp);
 			}
 		}
 		private void SkinRemove(object sender, RoutedEventArgs e)
 		{
-			_loadedAsset.DeleteSkin(_skinState.Skin);
+			LoadedAsset.DeleteSkin(_skinState.Skin);
 		}
 		private void SkinFrameAdd(object sender, RoutedEventArgs e)
 		{
 			Bitmap? bmp = SkinOpenDialog();
 			if (bmp != null)
 			{
-				_loadedAsset.AddSkinframe(bmp, _skinState.Skin);
+				LoadedAsset.AddSkinframe(bmp, _skinState.Skin);
 			}
 		}
 		private void SkinFrameRemove(object sender, RoutedEventArgs e)
 		{
-			_loadedAsset.DeleteSkinframe(_skinState.Skin, _skinState.Skinframe);
+			LoadedAsset.DeleteSkinframe(_skinState.Skin, _skinState.Skinframe);
 		}
 
 		// =====================
@@ -531,8 +532,7 @@ namespace yaqmv
 		{
 			// if a mousewheel event bubbles past something that could have handled it if it were
 			// focused, focus it and try again
-			var target = e.Source as UIElement;
-			if (target != null && target.Focusable && !target.IsFocused)
+			if (e.Source is UIElement target && target.Focusable && !target.IsFocused)
 			{
 				target.Focus();
 				target.RaiseEvent(e);
@@ -570,7 +570,7 @@ namespace yaqmv
 		}
 		private void SetSkinFrameSelectStatus()
 		{
-			SkinFrameSelect.IsEnabled = (_loadedAsset.skins[SelectedSkin].images.Count > 1);
+			SkinFrameSelect.IsEnabled = (LoadedAsset.skins[SelectedSkin].images.Count > 1);
 			if (SkinFrameSelect.IsEnabled)
 			{
 				SkinFrameSelect.ItemsSource = SkinFrameNames[SelectedSkin];
@@ -594,7 +594,7 @@ namespace yaqmv
 		private void BSkipEnd_Click(object sender, RoutedEventArgs e)
 		{
 			Playing = false;
-			Timeline.Value = _loadedAsset.anims[_modelState.Anim].last;
+			Timeline.Value = LoadedAsset.anims[_modelState.Anim].last;
 		}
 
 		private void BPlayPause_Click(object sender, RoutedEventArgs e)
@@ -605,7 +605,7 @@ namespace yaqmv
 		private void BSkipStart_Click(object sender, RoutedEventArgs e)
 		{
 			Playing = false;
-			Timeline.Value = _loadedAsset.anims[_modelState.Anim].first;
+			Timeline.Value = LoadedAsset.anims[_modelState.Anim].first;
 		}
 
 		private void ModeSelect_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -618,16 +618,16 @@ namespace yaqmv
 			if (!IsModelLoaded) return;
 			Bitmap? bmp = SkinOpenDialog();
 			if (bmp != null)
-				_loadedAsset.ReplaceImage(bmp, _skinState.Skin, _skinState.Skinframe);
+				LoadedAsset.ReplaceImage(bmp, _skinState.Skin, _skinState.Skinframe);
 		}
 		private void BSkinExport_Click(object sender, RoutedEventArgs e)
 		{
 			if (!IsModelLoaded) return;
-			SaveFileDialog saveFileDialog = new SaveFileDialog();
+			SaveFileDialog saveFileDialog = new();
 			saveFileDialog.Filter = "BMP files (*.bmp)|*.bmp|PNG files (*.png)|*.png|All files (*.*)|*.*";
 			if (saveFileDialog.ShowDialog() == true)
 			{
-				Bitmap bmp = _loadedAsset.ExportSkinImage(_modelState.Skin, _modelState.Skinframe);
+				Bitmap bmp = LoadedAsset.ExportSkinImage(_modelState.Skin, _modelState.Skinframe);
 
 				ImageFormat fmt = ImageFormat.Png;
 				if (Path.GetExtension(saveFileDialog.FileName) == ".bmp")
@@ -640,7 +640,7 @@ namespace yaqmv
 		private void BUVExport_Click(object sender, RoutedEventArgs e)
 		{
 			if (!IsModelLoaded) return;
-			SaveFileDialog saveFileDialog = new SaveFileDialog();
+			SaveFileDialog saveFileDialog = new();
 			saveFileDialog.Filter = "BMP files (*.bmp)|*.bmp|PNG files (*.png)|*.png|All files (*.*)|*.*";
 			if (saveFileDialog.ShowDialog() == true)
 			{
@@ -651,9 +651,9 @@ namespace yaqmv
 
 		private bool CheckBitmapSize(Bitmap bmp)
 		{
-			if (bmp.Width != _loadedAsset.SkinWidth || bmp.Height != _loadedAsset.SkinHeight)
+			if (bmp.Width != LoadedAsset.SkinWidth || bmp.Height != LoadedAsset.SkinHeight)
 			{
-				MessageBox.Show("Image has the wrong dimensions, model requires " + _loadedAsset.SkinWidth + "x" + _loadedAsset.SkinHeight,
+				MessageBox.Show("Image has the wrong dimensions, model requires " + LoadedAsset.SkinWidth + "x" + LoadedAsset.SkinHeight,
 				"Error", MessageBoxButton.OK, MessageBoxImage.Error);
 				return false;
 			}

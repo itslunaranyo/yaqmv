@@ -15,13 +15,13 @@ namespace yaqmv
 	internal class Texture
 	{
 
-		private int _handle { get; }
+		private int Handle { get; }
 
 		public Texture(int w, int h, byte[] pixeldata)
 		{
-			_handle = GL.GenTexture();
+			Handle = GL.GenTexture();
 
-			GL.BindTexture(TextureTarget.Texture2D, _handle);
+			GL.BindTexture(TextureTarget.Texture2D, Handle);
 			GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Nearest);
 			GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Nearest); 
 			GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)TextureWrapMode.ClampToBorder); 
@@ -32,7 +32,7 @@ namespace yaqmv
 		public void Bind(TextureUnit unit = TextureUnit.Texture0)
 		{
 			GL.ActiveTexture(unit);
-			GL.BindTexture(TextureTarget.Texture2D, _handle);
+			GL.BindTexture(TextureTarget.Texture2D, Handle);
 			//GLWhatsWrong();
 		}
 
@@ -47,7 +47,7 @@ namespace yaqmv
 		public void Dispose()
 		{
 			if (_disposed) return;
-			GL.DeleteTexture(_handle);
+			GL.DeleteTexture(Handle);
 			_disposed = true;
 		}
 	}
